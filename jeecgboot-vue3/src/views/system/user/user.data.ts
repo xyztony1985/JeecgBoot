@@ -195,6 +195,12 @@ export const formSchema: FormSchema[] = [
     dynamicRules: ({ model, schema }) => rules.duplicateCheckRule('sys_user', 'username', model, schema, true),
   },
   {
+    label: '用户姓名',
+    field: 'realname',
+    required: true,
+    component: 'Input',
+  },
+  {
     label: '登录密码',
     field: 'password',
     component: 'StrengthMeter',
@@ -219,10 +225,16 @@ export const formSchema: FormSchema[] = [
     dynamicRules: ({ values }) => rules.confirmPassword(values, true),
   },
   {
-    label: '用户姓名',
-    field: 'realname',
-    required: true,
+    label: '手机号码',
+    field: 'phone',
     component: 'Input',
+    // required: true,
+    dynamicRules: ({ model, schema }) => {
+      return [
+        { ...rules.duplicateCheckRule('sys_user', 'phone', model, schema, true)[0], trigger: 'blur' },
+        { pattern: /^1[3456789]\d{9}$/, message: '手机号码格式有误', trigger: 'blur' },
+      ];
+    },
   },
   {
     label: '工号',

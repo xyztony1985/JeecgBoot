@@ -23,4 +23,5 @@ export enum MenuEventEnum {
   CLOSE_ALL,
   SCALE,
   HOME_DESIGN,
+  OPEN_IN_NEW_WINDOW,
 }

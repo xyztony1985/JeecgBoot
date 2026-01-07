@@ -306,6 +306,8 @@ jeecg:
     app-id: ??
     api-key: ??
     secret-key: ??
+  login:
+    captcha: false
 #cas单点登录
 cas:
   prefixUrl: http://cas.example.org:8443/cas

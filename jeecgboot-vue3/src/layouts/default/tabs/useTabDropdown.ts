@@ -19,7 +19,7 @@ export function useTabDropdown(tabContentProps: TabContentProps, getIsTabs: Comp
   const { t } = useI18n();
   const tabStore = useMultipleTabStore();
   const { currentRoute } = useRouter();
-  const { refreshPage, closeAll, close, closeLeft, closeOther, closeRight, changeDesign } = useTabs();
+  const { refreshPage, closeAll, close, closeLeft, closeOther, closeRight, changeDesign, openInNewWindow } = useTabs();
 
   const getTargetTab = computed((): RouteLocationNormalized => {
     return unref(getIsTabs) ? tabContentProps.tabItem : unref(currentRoute);
@@ -76,6 +76,11 @@ export function useTabDropdown(tabContentProps: TabContentProps, getIsTabs: Comp
         event: MenuEventEnum.REFRESH_PAGE,
         text: t('layout.multipleTab.reload'),
         disabled: refreshDisabled,
+      },
+      {
+        icon: 'ant-design:export-outlined',
+        event: MenuEventEnum.OPEN_IN_NEW_WINDOW,
+        text: '在新窗口打开',
       },
       {
         icon: 'ant-design:setting-outlined',
@@ -141,6 +146,9 @@ export function useTabDropdown(tabContentProps: TabContentProps, getIsTabs: Comp
   function handleMenuEvent(menu: DropMenu): void {
     const { event } = menu;
     switch (event) {
+      case MenuEventEnum.OPEN_IN_NEW_WINDOW:
+        openInNewWindow();
+        break;
       case MenuEventEnum.REFRESH_PAGE:
         // refresh page
         refreshPage();

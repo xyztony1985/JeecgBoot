@@ -15,6 +15,7 @@ enum TableActionEnum {
   CLOSE_CURRENT,
   HOME_DESIGN,
   CLOSE,
+  OPEN_IN_NEW_WINDOW,
 }
 
 export function useTabs(_router?: Router) {
@@ -63,6 +64,12 @@ export function useTabs(_router?: Router) {
     }
     const currentTab = getCurrentTab();
     switch (action) {
+      case TableActionEnum.OPEN_IN_NEW_WINDOW:
+        const targetTab = tab || getCurrentTab();
+        const newUrl = `${window.location.origin}${targetTab.fullPath}?hideSider=true&hideHeader=true&hideMultiTabs=true`;
+        window.open(newUrl, '_blank');
+        break;
+
       case TableActionEnum.REFRESH:
         await tabStore.refreshPage(router);
         break;
@@ -110,6 +117,7 @@ export function useTabs(_router?: Router) {
   }
 
   return {
+    openInNewWindow: (tab) => handleTabAction(TableActionEnum.OPEN_IN_NEW_WINDOW, tab),
     refreshPage: () => handleTabAction(TableActionEnum.REFRESH),
     changeDesign: () => handleTabAction(TableActionEnum.HOME_DESIGN),
     // 代码逻辑说明: 【TV360X-732】非当前页右键关闭左侧、关闭右侧、关闭其它功能正常使用

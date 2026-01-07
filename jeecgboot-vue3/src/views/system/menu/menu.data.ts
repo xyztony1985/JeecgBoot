@@ -156,6 +156,10 @@ export const formSchema: FormSchema[] = [
     defaultValue:'layouts/default/index',
     required: true,
     ifShow: ({ values }) => !isButton(values.menuType),
+    helpMessage: [
+      'vue页面路径（去掉 src/view/前缀）',
+      '以 http 开头，认定为外部网址，用 iframe 的方式打开',
+    ],
   },
   {
     field: 'componentName',
@@ -305,6 +309,9 @@ export const formSchema: FormSchema[] = [
       unCheckedChildren: '否',
     },
     ifShow: ({ values }) => !isButton(values.menuType),
+    helpMessage: [
+      '缓存后，就不会每次进入标签，都重新加载。',
+    ],
   },
   {
     field: 'alwaysShow',

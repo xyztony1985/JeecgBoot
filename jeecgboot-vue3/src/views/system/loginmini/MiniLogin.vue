@@ -46,7 +46,7 @@
                           <a-input class="fix-auto-fill" type="password" :placeholder="t('sys.login.password')" v-model:value="formData.password" />
                         </a-form-item>
                       </div>
-                      <div class="aui-inputClear">
+                      <div class="aui-inputClear" v-show="true">
                         <i class="icon icon-code"></i>
                         <a-form-item>
                           <a-input class="fix-auto-fill" type="text" :placeholder="t('sys.login.inputCode')" v-model:value="formData.inputCode" />
@@ -240,7 +240,7 @@
   //扫码登录
   const codeRef = ref();
   //是否显示获取验证码
-  const showInterval = ref<boolean>(true);
+  const showInterval = ref<boolean>(false);
   //60s
   const timeRuning = ref<number>(60);
   //定时器
