@@ -1,10 +1,10 @@
 ## 快速开始
 
-快速把项目跑起来，是成功的第一步。
+快速把项目成功跑起来，至关重要。
 
 以下将按默认配置，启动项目。
 
-默认配置是指
+默认配置是指 [配置文件](.env.development) 保持默认值，主要是后端接口默认为 `http://localhost:8080/jeecg-boot`。
 
 ### 环境准备
 
@@ -19,6 +19,8 @@
     npm install pnpm -g
     ```
 
+- IDE：[VSCode](https://code.visualstudio.com/)
+
 ### 启动项目
 
 - 安装依赖
@@ -28,16 +30,6 @@
 
     pnpm install
     ```
-
-- 配置接口地址 `.env.development`
-
-    ```bash
-    VITE_PROXY = [["/jeecgboot","http://localhost:8080/jeecg-boot"],["/upload","http://localhost:3300/upload"]]
-    VITE_GLOB_DOMAIN_URL=http://localhost:8080/jeecg-boot
-    ```
-
-    > 说明：把`http://localhost:8080/jeecg-boot` 换成自己地址，其他不用改。
-
 
 - 运行项目
 
@@ -56,7 +48,7 @@ pnpm build
 
 ## 技术文档
 
-*   官方文档：[https://help.jeecg.com](https://help.jeecg.com)
+*   [官方文档](https://help.jeecg.com)
 *   [快速入门](http://jeecg.com/doc/quickstart) 
 *   [常见问题](http://help.jeecg.com/qa) 
 *   [Vue3 文档](https://cn.vuejs.org/)
