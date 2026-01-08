@@ -100,7 +100,6 @@
       },
       actionColumn: {
         width: 120,
-        fixed: 'right'
       },
       beforeFetch: (params) => {
         return Object.assign({ column: 'createTime', order: 'desc' }, params);

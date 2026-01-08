@@ -312,7 +312,7 @@ export function useListTable(tableProps: TableProps): [
       width: 120,
       title: '操作',
       //是否锁定操作列取值 right ,left,false
-      fixed: false,
+      fixed: 'right',
       dataIndex: 'action',
       slots: { customRender: 'action' },
     },
