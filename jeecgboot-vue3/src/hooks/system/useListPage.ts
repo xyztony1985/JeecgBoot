@@ -278,7 +278,7 @@ export function useListTable(tableProps: TableProps): [
       // 是否显示 展开/收起 按钮
       showAdvancedButton: true,
       // 超过指定列数默认折叠
-      autoAdvancedCol: 3,
+      autoAdvancedCol: 2,
       // 操作按钮配置
       actionColOptions: {
         ...adaptiveColProps,
