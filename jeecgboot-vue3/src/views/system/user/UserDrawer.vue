@@ -32,6 +32,7 @@
     labelWidth: 90,
     schemas: formSchema,
     showActionButtonGroup: false,
+    baseColProps: { span: 12 }, //24栅格系统，每列12栅格，即一半，双列显示
   });
   // TODO [VUEN-527] https://www.teambition.com/task/6239beb894b358003fe93626
   const showFooter = ref(true);
