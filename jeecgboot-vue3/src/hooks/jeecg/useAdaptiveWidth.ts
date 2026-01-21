@@ -79,9 +79,9 @@ export function useDrawerAdaptiveWidth() {
   return useAdaptiveWidth(
     {
       '<=620': '100%',
-      '<=1600': 600,
-      '<=1920': 650,
-      '>1920': 700,
+      '<=1600': '70%',
+      '<=1920': 800,
+      '>1920': 1200,
     },
     false
   );
