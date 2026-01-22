@@ -65,7 +65,6 @@ export const searchFormSchema: FormSchema[] = [
     field: 'titile',
     label: '标题',
     component: 'JInput',
-    colProps: { span: 6 },
   },
   {
     field: 'msgCategory',
@@ -76,7 +75,6 @@ export const searchFormSchema: FormSchema[] = [
       dictCode: 'msg_category',
       placeholder: '请选择类型',
     },
-    colProps: { span: 6 },
   },
   {
     field: 'msgClassify',
@@ -86,7 +84,6 @@ export const searchFormSchema: FormSchema[] = [
       dictCode: 'notice_type',
       placeholder: '请选择公告分类',
     },
-    colProps: { span: 6 },
   },
   {
     field: 'sendTime',
@@ -95,7 +92,6 @@ export const searchFormSchema: FormSchema[] = [
     componentProps: {
       valueType: 'Date',
     },
-    colProps: { span: 6 },
   },
 ];
 
