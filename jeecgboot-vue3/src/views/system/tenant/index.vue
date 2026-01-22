@@ -30,8 +30,8 @@
       <template #action="{ record }">
         <TableAction :actions="getActions(record)" />
       </template>
-    </BasicTable>
-    <TenantModal @register="registerModal" @success="reload" />
+  </BasicTable>
+  <TenantDrawer @register="registerDrawer" @success="reload" />
     <TenantInviteUserModal @register="registerSelUserModal" @inviteOk="handleInviteUserOk"/>
     <TenantUserModal @register="registerTenUserModal" />
     <!--  产品包  -->
@@ -44,9 +44,10 @@
   import { ref, unref } from 'vue';
   import { BasicTable, TableAction } from '/@/components/Table';
   import { useModal } from '/@/components/Modal';
+  import { useDrawer } from '/@/components/Drawer';
   import { getTenantList, deleteTenant, batchDeleteTenant, invitationUserJoin } from './tenant.api';
   import { columns, searchFormSchema } from './tenant.data';
-  import TenantModal from './components/TenantModal.vue';
+  import TenantDrawer from './components/TenantDrawer.vue';
   import { useMessage } from '/@/hooks/web/useMessage';
   import { useListPage } from '/@/hooks/system/useListPage';
   import TenantInviteUserModal from './components/TenantInviteUserModal.vue';
@@ -55,7 +56,7 @@
   import TenantRecycleBinModal from './components/TenantRecycleBinModal.vue';
 
   const { createMessage } = useMessage();
-  const [registerModal, { openModal }] = useModal();
+  const [registerDrawer, { openDrawer }] = useDrawer();
   const [registerSelUserModal, { openModal: userOpenModal }] = useModal();
   const [registerTenUserModal, { openModal: tenUserOpenModal }] = useModal();
   const [registerPackModal, { openModal: packModal }] = useModal();
@@ -119,7 +120,7 @@
    * 新增事件
    */
   function handleAdd() {
-    openModal(true, {
+    openDrawer(true, {
       isUpdate: false,
     });
   }
@@ -128,7 +129,7 @@
    * 编辑事件
    */
   function handleEdit(record) {
-    openModal(true, {
+    openDrawer(true, {
       record,
       isUpdate: true,
     });
