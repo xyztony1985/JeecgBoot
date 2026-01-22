@@ -88,10 +88,7 @@ export const searchFormSchema: FormSchema[] = [
   {
     field: 'sendTime',
     label: '发布时间',
-    component: 'RangePicker',
-    componentProps: {
-      valueType: 'Date',
-    },
+    component: 'RangeDate',
   },
 ];
 
