@@ -25,15 +25,7 @@
           :disabled="selectedRowKeys.length === 0"
           >邀请用户加入</a-button
         >
-        <a-button
-          preIcon="ant-design:sliders-outlined"
-          type="primary"
-          @click="handlePack"
-          style="margin-right: 5px"
-          :disabled="selectedRowKeys.length === 0"
-          >套餐管理</a-button
-        >
-        <a-button type="primary" @click="recycleBinClick" preIcon="ant-design:hdd-outlined">回收站</a-button>
+         <a-button type="primary" @click="recycleBinClick" preIcon="ant-design:hdd-outlined">回收站</a-button>
       </template>
       <template #action="{ record }">
         <TableAction :actions="getActions(record)" />
@@ -81,7 +73,7 @@
         fieldMapToTime: [['fieldTime', ['beginDate', 'endDate'], 'YYYY-MM-DD HH:mm:ss']],
       },
       actionColumn:{
-        width: 150,
+        width: 250,
         fixed:'right'
       }
     },
@@ -109,6 +101,16 @@
       {
         label: '用户',
         onClick: handleSeeUser.bind(null, record.id),
+      },
+      {
+        label: '套餐管理',
+        onClick() {
+          // 打开当前行的产品包管理
+          packModal(true, {
+            tenantId: record.id,
+            showPackAddAndEdit: true,
+          });
+        },
       },
     ];
   }
@@ -179,20 +181,6 @@
     });
   }
 
-  /**
-   * 新增产品包
-   */
-  function handlePack() {
-    if (unref(selectedRowKeys).length > 1) {
-      createMessage.warn('请选择一个');
-      return;
-    }
-    packModal(true, {
-      tenantId: unref(selectedRowKeys.value.join(',')),
-      //我的租户显示新增和编辑产品包
-      showPackAddAndEdit: true
-    });
-  }
 
   /**
    * 回收站
