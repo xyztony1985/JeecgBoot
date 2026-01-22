@@ -282,7 +282,8 @@ export function useListTable(tableProps: TableProps): [
       // 操作按钮配置
       actionColOptions: {
         ...adaptiveColProps,
-        style: { textAlign: 'left' },
+        // 默认将查询区的操作按钮靠右显示
+        style: { marginLeft: 'auto' },
       },
     },
     // 斑马纹
