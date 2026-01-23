@@ -59,7 +59,7 @@
   const [registerDrawer, { openDrawer }] = useDrawer();
   const [registerSelUserModal, { openModal: userOpenModal }] = useModal();
   const [registerTenUserModal, { openModal: tenUserOpenModal }] = useModal();
-  const [registerPackModal, { openModal: packModal }] = useModal();
+  const [registerPackModal, { openDrawer: packModal }] = useDrawer();
   const [registerRecycleBinModal, { openModal: recycleBinModal }] = useModal();
 
   // 列表页面公共参数、方法

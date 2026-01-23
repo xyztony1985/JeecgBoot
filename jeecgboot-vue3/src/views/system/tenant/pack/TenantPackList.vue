@@ -1,5 +1,5 @@
 <template>
-  <BasicModal v-bind="$attrs" @register="registerModal" :title="title" @ok="handleSubmit" width="800px" :showCancelBtn="false" :showOkBtn="false">
+  <BasicDrawer v-bind="$attrs" @register="registerDrawer" :title="title" width="800px" destroyOnClose>
     <BasicTable @register="registerTable" :rowSelection="rowSelection">
       <template #tableTitle>
         <a-button preIcon="ant-design:plus-outlined" type="primary" @click="handleAdd" style="margin-right: 5px" v-if="showPackAddAndEdit">新增 </a-button>
@@ -23,14 +23,15 @@
         <TableAction :actions="getActions(record)" :dropDownActions="getDropDownAction(record)" />
       </template>
     </BasicTable>
-  </BasicModal>
+  </BasicDrawer>
   <TenantPackMenuModal @register="registerPackMenu" @success="success" />
   <TenantPackUserModal @register="registerPackUser" @success="success" />
   <PackPermissionDrawer @register="registerPackPermDrawer" @success="success"/>
 </template>
 <script lang="ts" setup name="tenant-pack-modal">
   import { reactive, ref, unref } from 'vue';
-  import { BasicModal, useModal, useModalInner } from '/@/components/Modal';
+  import { BasicDrawer, useDrawer, useDrawerInner } from '/@/components/Drawer';
+  import { useModal } from '/@/components/Modal';
   import { packColumns, userColumns, packFormSchema } from '../tenant.data';
   import { getTenantUserList, leaveTenant, packList, deleteTenantPack, syncDefaultTenantPack } from '../tenant.api';
   import { useListPage } from '/@/hooks/system/useListPage';
@@ -40,7 +41,6 @@
   import TenantPackUserModal from './TenantPackUserModal.vue';
   import {useMessage} from "/@/hooks/web/useMessage";
   import PackPermissionDrawer from "@/views/system/tenant/pack/PackPermissionDrawer.vue";
-  import { useDrawer } from "@/components/Drawer";
 
   const [registerPackMenu, { openModal }] = useModal();
   const [registerPackUser, { openModal: packUserOpenModal }] = useModal();
@@ -79,7 +79,7 @@
   //是否显示新增和编辑套餐包
   const showPackAddAndEdit = ref<boolean>(false);
   //表单赋值
-  const [registerModal, { setModalProps, closeModal }] = useModalInner(async (data) => {
+  const [registerDrawer, { setDrawerProps, closeDrawer }] = useDrawerInner(async (data) => {
     tenantId.value = data.tenantId;
     showPackAddAndEdit.value = data.showPackAddAndEdit;
     success();
@@ -89,7 +89,7 @@
 
   //表单提交事件
   async function handleSubmit(v) {
-    closeModal();
+    closeDrawer();
   }
 
   function getActions(record) {
