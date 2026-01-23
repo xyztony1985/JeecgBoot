@@ -583,14 +583,12 @@ export const userTenantFormSchema: FormSchema[] = [
     label: '账号',
     field: 'username',
     component: 'Input',
-    colProps: { span: 6 },
   },
   {
     label: '名字',
     field: 'realname',
     component: 'Input',
-    colProps: { span: 6 },
-  },
+   },
   {
     label: '性别',
     field: 'sex',
@@ -600,7 +598,6 @@ export const userTenantFormSchema: FormSchema[] = [
       placeholder: '请选择性别',
       stringToNumber: true,
     },
-    colProps: { span: 6 },
   },
 ];
 
