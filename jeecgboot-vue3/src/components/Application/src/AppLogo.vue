@@ -4,20 +4,23 @@
 -->
 <template>
   <div class="anticon" :class="getAppLogoClass" @click="goHome">
-    <img src="../../../assets/images/logo.png" />
+    <img :src="tenantLogo || '../../../assets/images/logo.png'" alt="logo" />
     <div class="ml-2 truncate md:opacity-100" :class="getTitleClass" v-show="showTitle">
-      {{ shortTitle }}
+      {{ tenantName || shortTitle }}
     </div>
   </div>
 </template>
 <script lang="ts" setup>
-  import { computed, unref } from 'vue';
+  import { computed, unref, ref, onMounted } from 'vue';
   import { useGlobSetting } from '/@/hooks/setting';
   import { useGo } from '/@/hooks/web/usePage';
   import { useMenuSetting } from '/@/hooks/setting/useMenuSetting';
   import { useDesign } from '/@/hooks/web/useDesign';
   import { PageEnum } from '/@/enums/pageEnum';
   import { useUserStore } from '/@/store/modules/user';
+  import { getTenantById } from '/@/views/system/tenant/tenant.api';
+  import { getTenantId } from '/@/utils/auth';
+  import { getFileAccessHttpUrl } from '/@/utils/common/compUtils';
 
   const props = defineProps({
     /**
@@ -38,6 +41,9 @@
   const { getCollapsedShowTitle } = useMenuSetting();
   const userStore = useUserStore();
   const { title, shortTitle } = useGlobSetting();
+  // tenant dynamic
+  const tenantLogo = ref('');
+  const tenantName = ref('');
   
   const go = useGo();
 
@@ -49,6 +55,30 @@
       'xs:opacity-0': !props.alwaysShowTitle,
     },
   ]);
+
+  // init tenant info (logo / company name)
+  onMounted(async () => {
+    try {
+      const tId = getTenantId();
+      if (tId) {
+        const res: any = await getTenantById({ id: tId });
+        if (res) {
+          if (res.companyLogo) {
+            tenantLogo.value = getFileAccessHttpUrl(res.companyLogo);
+          }
+          if (res.name) {
+            tenantName.value = res.name;
+            // update document title so browser tab shows tenant company name
+            try {
+              document.title = res.name;
+            } catch (e) {}
+          }
+        }
+      }
+    } catch (err) {
+      // ignore
+    }
+  });
 
   function goHome() {
     go(userStore.getUserInfo.homePath || PageEnum.BASE_HOME);
