@@ -14,6 +14,7 @@ import { getRawRoute } from '/@/utils';
 import { MULTIPLE_TABS_KEY } from '/@/enums/cacheEnum';
 
 import projectSetting from '/@/settings/projectSetting';
+import { router as appRouter } from '/@/router';
 import { useUserStore } from '/@/store/modules/user';
 import type { LocationQueryRaw, RouteParamsRaw } from 'vue-router';
 import { getMenus } from '/@/router/menus';
@@ -250,7 +251,22 @@ export const useMultipleTabStore = defineStore({
             index !== -1 && this.tabList.splice(index, 1);
           }
         }
-        this.tabList.push(route);
+        // Insert the new tab to the right of the currently active tab when possible
+        try {
+          const currentFullPath = appRouter?.currentRoute?.value?.fullPath || appRouter?.currentRoute?.value?.path;
+          let insertIndex = -1;
+          if (currentFullPath) {
+            insertIndex = this.tabList.findIndex((t) => (t.fullPath || t.path) === currentFullPath);
+          }
+          if (insertIndex !== -1) {
+            this.tabList.splice(insertIndex + 1, 0, route);
+          } else {
+            this.tabList.push(route);
+          }
+        } catch (e) {
+          // Fallback to push if router not ready or any error occurs
+          this.tabList.push(route);
+        }
       }
       this.updateCacheTab();
       cacheTab && Persistent.setLocal(MULTIPLE_TABS_KEY, this.tabList);
