@@ -64,13 +64,11 @@ export const searchFormSchema: FormSchema[] = [
     field: 'titile',
     label: '标题',
     component: 'Input',
-    colProps: { span: 6 },
   },
   {
     field: 'sender',
     label: '发布人',
     component: 'Input',
-    colProps: { span: 6 },
   },
   {
     field: 'sendTime',
@@ -79,7 +77,6 @@ export const searchFormSchema: FormSchema[] = [
     componentProps: {
       valueType: 'Date',
     },
-    colProps: { span: 6 },
   },
   {
     field: 'msgCategory',
@@ -97,6 +94,5 @@ export const searchFormSchema: FormSchema[] = [
         { label: '督办通知', value: 'supe' },
       ],
     },
-    colProps: { span: 6 },
   },
 ];
