@@ -67,6 +67,9 @@ export default {
       xs: { span: 24 },
       sm: { span: 18 },
     },
+    rowProps: {
+      gutter: 8,
+    },
     //表单默认冒号
     colon: true,
   },

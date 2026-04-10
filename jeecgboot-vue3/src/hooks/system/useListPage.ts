@@ -244,9 +244,9 @@ export function useListTable(tableProps: TableProps): [
     xs: 24, // <576px
     sm: 12, // ≥576px
     md: 12, // ≥768px
-    lg: 8, // ≥992px
-    xl: 8, // ≥1200px
-    xxl: 6, // ≥1600px
+    lg: 6, // ≥992px
+    xl: 6, // ≥1200px
+    xxl: 4, // ≥1600px
   };
   const defaultTableProps: TableProps = {
     rowKey: 'id',
@@ -254,6 +254,8 @@ export function useListTable(tableProps: TableProps): [
     useSearchForm: true,
     // 查询条件区域配置
     formConfig: {
+      // 默认垂直布局，标签在输入框上方
+      layout: 'vertical',
       // 紧凑模式
       compact: true,
       // label默认宽度
@@ -278,7 +280,7 @@ export function useListTable(tableProps: TableProps): [
       // 是否显示 展开/收起 按钮
       showAdvancedButton: true,
       // 超过指定列数默认折叠
-      autoAdvancedCol: 2,
+      autoAdvancedCol: 3,
       // 操作按钮配置
       actionColOptions: {
         ...adaptiveColProps,

@@ -100,7 +100,7 @@ export const basicProps = {
     default: form.labelCol,
   },
 
-  layout: propTypes.oneOf(['horizontal', 'vertical', 'inline']).def('horizontal'),
+  layout: propTypes.oneOf(['horizontal', 'vertical', 'inline']).def('vertical'),
   tableAction: {
     type: Object as PropType<TableActionType>,
   },
@@ -114,7 +114,10 @@ export const basicProps = {
 
   labelAlign: propTypes.string,
 
-  rowProps: Object as PropType<RowProps>,
+  rowProps: {
+    type: Object as PropType<RowProps>,
+    default: () => form.rowProps || { gutter: 8 },
+  },
   
   // 当表单是查询条件的时候 当表单改变后自动查询，不需要点击查询按钮
   autoSearch: propTypes.bool.def(false),

@@ -104,6 +104,17 @@
             mergeProps.wrapperCol = undefined;
           }
         }
+
+        // 处理垂直布局下的宽度问题
+        if (mergeProps.layout === 'vertical') {
+          if (mergeProps.labelCol === componentSetting.form.labelCol) {
+            mergeProps.labelCol = { span: 24 };
+          }
+          if (mergeProps.wrapperCol === componentSetting.form.wrapperCol) {
+            mergeProps.wrapperCol = { span: 24 };
+          }
+        }
+
         return mergeProps;
       });
 
@@ -122,6 +133,7 @@
         const { baseRowStyle = {}, rowProps } = unref(getProps);
         return {
           style: baseRowStyle,
+          ...componentSetting.form.rowProps,
           ...rowProps,
         };
       });
@@ -442,7 +454,17 @@
 
     &--compact {
       .ant-form-item {
-        margin-bottom: 8px !important;
+        margin-bottom: 12px !important;
+
+        .ant-form-item-label {
+          padding-bottom: 2px !important;
+          
+          // 紧凑模式下（如列表搜索区），将 Label 视作次要元素调浅颜色
+          > label {
+            color: @text-color-secondary;
+            padding-left: 4px;
+          }
+        }
       }
     }
     // 代码逻辑说明: 【QQYUN-6566】BasicForm支持一行显示(inline)
@@ -450,6 +472,24 @@
       & > .ant-row {
         .ant-col { width:auto !important; }
       }
+    }
+
+    // ✅ 新增：让表单行使用 Flex 布局，按钮区域自动靠右
+    & > .ant-row {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: flex-end; // 确保表单项和操作按钮区域底对齐
+
+      > .ant-col {
+        // 给列添加位置和宽度的过渡动画，使展开/收起时平滑过渡，避免生硬闪动
+        transition: all 0.3s cubic-bezier(0.34, 0.69, 0.1, 1);
+      }
+    }
+
+    // 让包含按钮的 Col（最后一个）自动靠右
+    & > .ant-row > .ant-col:last-of-type {
+      margin-left: auto;
+      flex: 0 0 auto;
     }
   }
 </style>
