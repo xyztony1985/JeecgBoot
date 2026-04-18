@@ -162,7 +162,8 @@ export function useTableScroll(
           const tr = tableEl.querySelector('.ant-table-tbody')?.children ?? [];
           const lastrEl = tr[tr.length - 1] as HTMLElement;
           const trHeight = lastrEl.offsetHeight;
-          const dataHeight = trHeight * pageSize;
+          const scrollbarHeight = tableBody.offsetHeight - tableBody.clientHeight;
+          const dataHeight = trHeight * pageSize + scrollbarHeight; // +scrollbarHeight 修复有横向滚动条时，表体高度略小，从而出现纵向滚动条
           if (tableBody && lastrEl) {
             // table是否隐藏（隐藏的table不能吸底）
             const isTableBodyHide = tableBody.offsetHeight == 0 && tableBody.offsetWidth == 0;
