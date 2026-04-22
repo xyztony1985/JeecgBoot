@@ -3,7 +3,7 @@ import { FormSchema } from '/@/components/Table';
 import { h } from 'vue';
 import { Icon } from '/@/components/Icon';
 import { duplicateCheck } from '../user/user.api';
-import { ajaxGetDictItems ,checkPermDuplication } from './menu.api';
+import { ajaxGetDictItems, checkPermDuplication } from './menu.api';
 import { render } from '/@/utils/common/renderUtils';
 
 const isDir = (type) => type === 0;
@@ -63,7 +63,16 @@ export const searchFormSchema: FormSchema[] = [
     field: 'name',
     label: '菜单名称',
     component: 'Input',
-    colProps: { span: 8 },
+  },
+  {
+    field: 'url',
+    label: '访问路径',
+    component: 'Input'
+  },
+  {
+    field: 'component',
+    label: '前端组件',
+    component: 'Input',
   },
 ];
 
@@ -102,7 +111,7 @@ export const formSchema: FormSchema[] = [
             },
           ]);
           // 代码逻辑说明: [VUEN-1834]只有一级菜单，才默认值，子菜单的时候，清空------------
-          if (isMenu(e) && !formModel.id && (formModel.component=='layouts/default/index' || formModel.component=='layouts/RouteView')) {
+          if (isMenu(e) && !formModel.id && (formModel.component == 'layouts/default/index' || formModel.component == 'layouts/RouteView')) {
             formModel.component = '';
           }
         },
@@ -142,8 +151,8 @@ export const formSchema: FormSchema[] = [
     // 代码逻辑说明: [issues/5008]子表数据权限设置不生效
     ifShow: ({ values }) => !(values.component === ComponentTypes.IFrame && values.internalOrExternal),
     // 代码逻辑说明: 聚合路由允许路径重复
-     dynamicRules: ({ model, schema,values }) => {
-       return checkPermDuplication(model, schema,  values.menuType !== 2?true:false);
+    dynamicRules: ({ model, schema, values }) => {
+      return checkPermDuplication(model, schema, values.menuType !== 2 ? true : false);
     },
   },
   {
@@ -153,12 +162,12 @@ export const formSchema: FormSchema[] = [
     componentProps: {
       placeholder: '请输入前端组件',
     },
-    defaultValue:'layouts/default/index',
+    defaultValue: 'layouts/default/index',
     required: true,
     ifShow: ({ values }) => !isButton(values.menuType),
     helpMessage: [
-      'vue页面路径（去掉 src/view/前缀）',
-      '以 http 开头，认定为外部网址，用 iframe 的方式打开',
+      '- vue 页面路径（去掉 src/view/前缀），如：system/menu/index',
+      '- 以 http 开头，将用 iframe 的方式打开',
     ],
   },
   {
@@ -276,6 +285,9 @@ export const formSchema: FormSchema[] = [
       unCheckedChildren: '否',
     },
     ifShow: ({ values }) => !isButton(values.menuType),
+    helpMessage: [
+      '以嵌方式打开，必须选是',
+    ],
   },
   {
     field: 'hidden',
