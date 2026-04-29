@@ -48,8 +48,15 @@
   mvn clean install -Dmaven.test.skip=true
   ```
 
-- 启动类
-  > jeecg-module-system/jeecg-system-start/src/main/java/org/jeecg/JeecgSystemApplication.java
+- 启动项目
+
+  ```bash
+  # 启动类
+  # jeecg-module-system/jeecg-system-start/src/main/java/org/jeecg/JeecgSystemApplication.java
+
+  cd /d jeecg-module-system\jeecg-system-start
+  mvn spring-boot:run
+  ```
 
 - 访问 <http://localhost:8080/jeecg-boot/doc.html>，正常打开，说明启动成功
 
