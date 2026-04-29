@@ -20,9 +20,9 @@ management:
         include: metrics,httpexchanges,jeecghttptrace
 
 spring:
-#  main:
-#    # 启动加速 (建议开发环境，开启后flyway自动升级失效)
-#    lazy-initialization: true
+  main:
+    # 启动加速 (建议开发环境，开启后flyway自动升级失效)
+    lazy-initialization: true
   flyway:
     # 是否启用flyway
     enabled: false
