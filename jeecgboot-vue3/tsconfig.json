@@ -25,7 +25,8 @@
       "/@/*": ["src/*"],
       "/#/*": ["types/*"],
       "@/*": ["src/*"],
-      "#/*": ["types/*"]
+      "#/*": ["types/*"],
+      "~icons/*": ["node_modules/unplugin-icons/types/*"]
     }
   },
   "include": [

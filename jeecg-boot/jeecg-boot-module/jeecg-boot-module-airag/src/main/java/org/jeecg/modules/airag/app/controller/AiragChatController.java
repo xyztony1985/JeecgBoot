@@ -8,6 +8,8 @@ import org.jeecg.common.constant.CommonConstant;
 import org.jeecg.common.util.CommonUtils;
 import org.jeecg.config.shiro.IgnoreAuth;
 import org.jeecg.modules.airag.app.service.IAiragChatService;
+import org.jeecg.modules.airag.app.vo.AiDrawGenerateVo;
+import org.jeecg.modules.airag.app.vo.AiWriteGenerateVo;
 import org.jeecg.modules.airag.app.vo.ChatConversation;
 import org.jeecg.modules.airag.app.vo.ChatSendParams;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -103,6 +105,19 @@ public class AiragChatController {
     }
 
     /**
+     * 根据类型获取所有对话
+     *
+     * @return 返回一个Result对象，包含所有对话的信息
+     * @author wangshuai
+     * @date 2025/12/11 11:42
+     */
+    @IgnoreAuth
+    @GetMapping(value = "/getConversationsByType")
+    public Result<?> getConversationsByType(@RequestParam(value = "sessionType") String sessionType) {
+        return chatService.getConversationsByType(sessionType);
+    }
+
+    /**
      * 删除会话
      *
      * @param id
@@ -113,7 +128,22 @@ public class AiragChatController {
     @IgnoreAuth
     @DeleteMapping(value = "/conversation/{id}")
     public Result<?> deleteConversation(@PathVariable("id") String id) {
-        return chatService.deleteConversation(id);
+        return chatService.deleteConversation(id,"");
+    }
+
+    /**
+     * 删除会话
+     *
+     * @param id
+     * @return
+     * @author wangshuai
+     * @date 2025/12/11 20:00
+     */
+    @IgnoreAuth
+    @DeleteMapping(value = "/conversation/{id}/{sessionType}")
+    public Result<?> deleteConversationByType(@PathVariable("id") String id,
+                                        @PathVariable("sessionType") String sessionType) {
+        return chatService.deleteConversation(id,sessionType);
     }
 
     /**
@@ -139,8 +169,9 @@ public class AiragChatController {
      */
     @IgnoreAuth
     @GetMapping(value = "/messages")
-    public Result<?> getMessages(@RequestParam(value = "conversationId", required = true) String conversationId) {
-        return chatService.getMessages(conversationId);
+    public Result<?> getMessages(@RequestParam(value = "conversationId", required = true) String conversationId,
+                                 @RequestParam(value = "sessionType", required = false) String sessionType) {
+        return chatService.getMessages(conversationId, sessionType);
     }
 
     /**
@@ -153,7 +184,21 @@ public class AiragChatController {
     @IgnoreAuth
     @GetMapping(value = "/messages/clear/{conversationId}")
     public Result<?> clearMessage(@PathVariable(value = "conversationId") String conversationId) {
-        return chatService.clearMessage(conversationId);
+        return chatService.clearMessage(conversationId, "");
+    }    
+    
+    /**
+     * 清空消息
+     *
+     * @return
+     * @author wangshuai
+     * @date 2025/12/11 19:06
+     */
+    @IgnoreAuth
+    @GetMapping(value = "/messages/clear/{conversationId}/{sessionType}")
+    public Result<?> clearMessageByType(@PathVariable(value = "conversationId") String conversationId,
+                                        @PathVariable(value = "sessionType") String sessionType) {
+        return chatService.clearMessage(conversationId, sessionType);
     }
 
     /**
@@ -217,4 +262,45 @@ public class AiragChatController {
         return result;
     }
 
+    /**
+     * ai海报生成
+     * @return
+     */
+    @PostMapping("/genAiPoster")
+    public Result<String> genAiPoster(@RequestBody AiDrawGenerateVo aiDrawGenerateVo){
+        String imageUrl = chatService.genAiPoster(aiDrawGenerateVo);
+        return Result.OK(imageUrl);
+    }
+
+    //update-begin---author:wangshuai ---date:2026-04-15  for：【QQYUN-14568】AI海报生成改为异步，支持切换菜单后重新获取结果-----------
+    /**
+     * 异步提交AI海报生成任务，立即返回taskId
+     */
+    @PostMapping("/genAiPosterAsync")
+    public Result<String> genAiPosterAsync(@RequestBody AiDrawGenerateVo aiDrawGenerateVo) {
+        String taskId = chatService.genAiPosterAsync(aiDrawGenerateVo);
+        return Result.OK(taskId);
+    }
+
+    /**
+     * 查询AI海报异步任务结果
+     * status: pending / success / failed
+     */
+    @GetMapping("/getAiPosterResult/{taskId}")
+    public Result<?> getAiPosterResult(@PathVariable String taskId) {
+        return chatService.getAiPosterResult(taskId);
+    }
+    //update-end---author:wangshuai ---date:2026-04-15  for：【QQYUN-14568】AI海报生成改为异步，支持切换菜单后重新获取结果-----------
+
+
+    /**
+     * 生成ai写作
+     * 
+     * @param aiWriteGenerateVo
+     * @return
+     */
+    @PostMapping("/genAiWriter")
+    public SseEmitter genAiWriter(@RequestBody AiWriteGenerateVo aiWriteGenerateVo){
+        return chatService.genAiWriter(aiWriteGenerateVo);
+    }
 }

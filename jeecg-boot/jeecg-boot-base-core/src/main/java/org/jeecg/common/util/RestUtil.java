@@ -8,6 +8,8 @@ import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.web.client.RestTemplate;
 
+import java.net.URI;
+import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.Iterator;
 import java.util.Map;
@@ -46,7 +48,7 @@ public class RestUtil {
 
     public static String getBaseUrl() {
         String basepath = getDomain() + getPath();
-        log.info(" RestUtil.getBaseUrl: " + basepath);
+        log.debug(" RestUtil.getBaseUrl: " + basepath);
         return basepath;
     }
 
@@ -199,7 +201,7 @@ public class RestUtil {
      * @return ResponseEntity<responseType>
      */
     public static <T> ResponseEntity<T> request(String url, HttpMethod method, HttpHeaders headers, JSONObject variables, Object params, Class<T> responseType) {
-        log.info(" RestUtil  --- request ---  url = "+ url);
+        log.debug(" RestUtil  --- request ---  url = "+ url);
         if (StringUtils.isEmpty(url)) {
             throw new RuntimeException("url 不能为空");
         }
@@ -230,12 +232,12 @@ public class RestUtil {
             String current = headers.getFirst(HttpHeaders.CONTENT_LENGTH);
             if (current == null || !current.equals(String.valueOf(contentLength))) {
                 headers.setContentLength(contentLength);
-                log.info(" RestUtil  --- request --- 修正/设置 Content-Length = " + contentLength + (current!=null?" (原值="+current+")":""));
+                log.debug(" RestUtil  --- request --- 修正/设置 Content-Length = " + contentLength + (current!=null?" (原值="+current+")":""));
             }
         }
         // 发送请求
         HttpEntity<String> request = new HttpEntity<>(body, headers);
-        return RT.exchange(url, method, request, responseType);
+        return RT.exchange(URI.create(url), method, request, responseType);
     }
 
     /**
@@ -252,7 +254,7 @@ public class RestUtil {
      */
     public static <T> ResponseEntity<T> request(String url, HttpMethod method, HttpHeaders headers,
                                                 JSONObject variables, Object params, Class<T> responseType, int timeout) {
-        log.info(" RestUtil  --- request ---  url = "+ url + ", timeout = " + timeout);
+        log.debug(" RestUtil  --- request ---  url = "+ url + ", timeout = " + timeout);
 
         if (StringUtils.isEmpty(url)) {
             throw new RuntimeException("url 不能为空");
@@ -302,13 +304,13 @@ public class RestUtil {
             String current = headers.getFirst(HttpHeaders.CONTENT_LENGTH);
             if (current == null || !current.equals(String.valueOf(contentLength))) {
                 headers.setContentLength(contentLength);
-                log.info(" RestUtil  --- request(timeout) --- 修正/设置 Content-Length = " + contentLength + (current!=null?" (原值="+current+")":""));
+                log.debug(" RestUtil  --- request(timeout) --- 修正/设置 Content-Length = " + contentLength + (current!=null?" (原值="+current+")":""));
             }
         }
 
         // 发送请求
         HttpEntity<String> request = new HttpEntity<>(body, headers);
-        return restTemplate.exchange(url, method, request, responseType);
+        return restTemplate.exchange(URI.create(url), method, request, responseType);
     }
 
     /**
@@ -341,7 +343,10 @@ public class RestUtil {
             Object object = source.get(key);
             if (object != null) {
                 if (!StringUtils.isEmpty(object.toString())) {
-                    value = object.toString();
+                    //update-begin---author:sjlei---date:20260414  for：【jeecg-ai#17】修复工具节点参数值含{}时URI模板展开报错-----------
+                    // URL 编码参数值，防止值中含 {}、空格等特殊字符导致 URI 解析异常
+                    value = URLEncoder.encode(object.toString(), StandardCharsets.UTF_8);
+                    //update-end-----author:sjlei---date:20260414  for：【jeecg-ai#17】修复工具节点参数值含{}时URI模板展开报错-----------
                 }
             }
             urlVariables.append("&").append(key).append("=").append(value);

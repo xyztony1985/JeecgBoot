@@ -12,7 +12,9 @@ import org.jeecg.common.constant.enums.DySmsEnum;
 import org.jeecg.common.constant.enums.EmailTemplateEnum;
 import org.jeecg.common.system.api.ISysBaseAPI;
 import org.jeecg.common.system.vo.*;
+import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -86,6 +88,11 @@ public class SysBaseAPIFallback implements ISysBaseAPI {
     @Override
     public Set<String> getDepartParentIdsByDepIds(Set<String> depIds) {
         return null;
+    }
+
+    @Override
+    public Map<String, List<String>> getDepartIdsByUserIds(Collection<String> userIds) {
+        return Map.of();
     }
 
     @Override
@@ -507,8 +514,18 @@ public class SysBaseAPIFallback implements ISysBaseAPI {
     }
 
     @Override
+    public SseEmitter runAiragFlowStream(AiragFlowDTO airagFlowDTO) {
+        return null;
+    }
+
+    @Override
     public void uniPushMsgToUser(PushMessageDTO pushMessageDTO) {
 
+    }
+
+    @Override
+    public SysDepartModel queryMainDepartByUsername(String username) {
+        return null;
     }
 
     @Override

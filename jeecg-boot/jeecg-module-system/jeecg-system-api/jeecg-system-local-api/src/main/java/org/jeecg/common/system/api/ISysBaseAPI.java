@@ -11,7 +11,9 @@ import org.jeecg.common.constant.enums.DySmsEnum;
 import org.jeecg.common.constant.enums.EmailTemplateEnum;
 import org.jeecg.common.system.vo.*;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -119,6 +121,14 @@ public interface ISysBaseAPI extends CommonAPI {
      * @return 部门 parentIds
      */
     Set<String> getDepartParentIdsByDepIds(Set<String> depIds);
+
+    /**
+     * 8.4 通过 userIds 查询部门ID列表
+     *
+     * @param userIds
+     * @return key = userId; value = 用户拥有的部门ID列表
+     */
+    Map<String, List<String>> getDepartIdsByUserIds(Collection<String> userIds);
 
     /**
      * 9通过用户账号查询部门 name
@@ -619,6 +629,17 @@ public interface ISysBaseAPI extends CommonAPI {
     Object runAiragFlow(AiragFlowDTO airagFlowDTO);
 
     /**
+     * 流式运行AIRag流程
+     * for [QQYUN-13634]在baseapi里面封装方法，方便其他模块调用
+     *
+     * @param airagFlowDTO
+     * @return 流程执行结果,可能是String或者Map
+     * @author chenrui
+     * @date 2025/9/2 11:43
+     */
+    SseEmitter runAiragFlowStream(AiragFlowDTO airagFlowDTO);
+
+    /**
      * 根据部门code或部门id获取部门名称(当前和上级部门)
      *
      * @param orgCode 部门编码
@@ -632,4 +653,17 @@ public interface ISysBaseAPI extends CommonAPI {
      * @param pushMessageDTO   推送消息
      */
     void uniPushMsgToUser(PushMessageDTO pushMessageDTO);
+
+    /**
+     * 根据用户名查询用户主部门信息。
+     * <p>
+     * 逻辑：取用户的主岗位（mainDepPostId），再查询该岗位节点在 sys_depart 中的父节点，
+     * 父节点即为用户的主部门，返回其信息。
+     * <p>
+     *
+     * @param username 用户账号
+     * @return 主部门信息，若用户未配置主岗位则返回 {@code null}
+     */
+    SysDepartModel queryMainDepartByUsername(String username);
+
 }

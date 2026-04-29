@@ -19,7 +19,7 @@ const __APP_INFO__ = {
   lastBuildTime: dayjs().format('YYYY-MM-DD HH:mm:ss'),
 };
 
-export default ({ command, mode }: ConfigEnv): UserConfig => {
+export default async ({ command, mode }: ConfigEnv): Promise<UserConfig> => {
   const root = process.cwd();
 
   const env = loadEnv(mode, root);
@@ -86,6 +86,17 @@ export default ({ command, mode }: ConfigEnv): UserConfig => {
       proxy: createProxy(VITE_PROXY),
       // 合并 server 配置
       ...serverOptions,
+      // update-begin--author:liaozhiyang---date:20260306---for:【QQYUN-14801】vite启动的时候，预构建一些入口页面，访问时快一些
+      // 启动时预构建
+      warmup: {
+        clientFiles: [
+          './src/main.ts',
+          './src/App.vue',
+          './src/views/system/loginmini/MiniLogin.vue',
+          'src/layouts/default/index.vue'
+        ],
+      },
+      // update-end--author:liaozhiyang---date:20260306---for:【QQYUN-14801】vite启动的时候，预构建一些入口页面，访问时快一些
     },
     build: {
       minify: 'esbuild',
@@ -94,7 +105,7 @@ export default ({ command, mode }: ConfigEnv): UserConfig => {
       outDir: OUTPUT_DIR,
       rollupOptions: {
         // 关闭除屑优化，防止删除重要代码，导致打包后功能出现异常
-        treeshake: false,
+        // treeshake: false,
         output: {
           chunkFileNames: 'js/[name]-[hash].js', // 引入文件名的名称
           entryFileNames: 'js/[name]-[hash].js', // 包的入口文件名称
@@ -102,10 +113,7 @@ export default ({ command, mode }: ConfigEnv): UserConfig => {
           manualChunks: {
             // vue vue-router合并打包
             'vue-vendor': ['vue', 'vue-router'],
-            'antd-vue-vendor': ['ant-design-vue','@ant-design/icons-vue','@ant-design/colors'],
-            'vxe-table-vendor': ['vxe-table','vxe-table-plugin-antd','xe-utils'],
             'emoji-mart-vue-fast': ['emoji-mart-vue-fast'],
-            'china-area-data-vendor': ['china-area-data']
           },
         },
       },
@@ -134,15 +142,35 @@ export default ({ command, mode }: ConfigEnv): UserConfig => {
     },
 
     // The vite plugin used by the project. The quantity is large, so it is separately extracted and managed
-    // 预加载构建配置（首屏性能)
-    plugins: createVitePlugins(viteEnv, isBuild, isQiankunMicro),
+    plugins: await createVitePlugins(viteEnv, isBuild, isQiankunMicro),
+
     optimizeDeps: {
       esbuildOptions: {
         target: 'es2020',
       },
+      // @iconify/iconify: The dependency is dynamically and virtually loaded by @purge-icons/generated, so it needs to be specified explicitly
+      include: [
+        // 强制预构建clipboard，解决Vite6对CommonJS模块的严格检查
+        'clipboard',
+        '@vue/shared',
+        '@iconify/iconify',
+        'ant-design-vue/es/locale/zh_CN',
+        'ant-design-vue/es/locale/en_US',
+        // update-begin--author:scott---date:20260427---for: 集成 @jeecg/aiflow（预编译 lib 在 node_modules）时，
+        // Vite 默认不扫描 node_modules 里已打包的 mjs，导致 ant-design-vue/es/vc-picker/generate/dayjs.js
+        // 引入的 dayjs 插件子路径（UMD/CJS）未被预打包，运行时报 "does not provide an export named 'default'"。
+        // 显式列出 vc-picker 用到的全部 dayjs 插件，强制 esbuild 预打包成 ESM。
+        'dayjs/plugin/advancedFormat',
+        'dayjs/plugin/customParseFormat',
+        'dayjs/plugin/weekday',
+        'dayjs/plugin/localeData',
+        'dayjs/plugin/weekOfYear',
+        'dayjs/plugin/weekYear',
+        'dayjs/plugin/quarterOfYear',
+        // update-end--author:scott---date:20260427---for: 集成 @jeecg/aiflow 时 dayjs 插件 default 导出报错
+      ],
       exclude: [
-        //升级vite4后，需要排除online依赖
-        '@jeecg/online',
+        //升级vite4后，需要排除online和aiflow依赖
         '@jeecg/aiflow',
       ],
     },

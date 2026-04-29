@@ -39,7 +39,7 @@
               </a-space>
             </div>
             <a-row :span="24" class="knowledge-row">
-              <a-col :xxl="4" :xl="6" :lg="6" :md="6" :sm="12" :xs="24">
+              <a-col :xxl="4" :xl="6" :lg="6" :md="6" :sm="12" :xs="24" v-if="!type || type==='knowledge'">
                 <a-card class="add-knowledge-card" :bodyStyle="cardBodyStyle">
                   <span style="line-height: 18px;font-weight: 500;color:#676f83;font-size: 12px">
                     创建文档
@@ -54,6 +54,9 @@
                   </div>
                   <div class="add-knowledge-doc" @click="handleCreateUpload">
                     <Icon icon="ant-design:cloud-upload-outlined" size="13"></Icon><span>文件上传</span>
+                  </div>
+                  <div class="add-knowledge-doc" @click="handleCreateWeb">
+                    <Icon icon="ant-design:global-outlined" size="13"></Icon><span>网页录入</span>
                   </div>
                   <div class="add-knowledge-doc">
                     <a-upload
@@ -98,6 +101,7 @@
                   <div class="knowledge-header">
                     <div class="header-text flex">
                       <Icon v-if="item.type==='text'" icon="ant-design:file-text-outlined" size="32" color="#00a7d0"></Icon>
+                      <Icon v-if="item.type==='web'" icon="ant-design:global-outlined" size="32" color="#1890ff"></Icon>
                       <Icon v-if="item.type==='file' && getFileSuffix(item.metadata) === 'pdf'" icon="ant-design:file-pdf-outlined" size="32" color="rgb(211, 47, 47)"></Icon>
                       <Icon v-if="item.type==='file' && getFileSuffix(item.metadata) === 'docx'" icon="ant-design:file-word-outlined" size="32" color="rgb(68, 138, 255)"></Icon>
                       <Icon v-if="item.type==='file' && getFileSuffix(item.metadata) === 'pptx'" icon="ant-design:file-ppt-outlined" size="32" color="rgb(245, 124, 0)"></Icon>
@@ -359,7 +363,9 @@
       //注册modal
       const [docTextRegister, { openModal: docTextOpenModal }] = useModal();
       const [docTextDescRegister, { openModal: docTextDescOpenModal }] = useModal();
-
+      const type = ref<string>('');
+      // 知识库的分段策略 metadata
+      const knowledgeMetadata = ref<string>('');
       //注册modal
       const [registerModal, { closeModal, setModalProps }] = useModalInner(async (data) => {
         knowledgeId.value = data.id;
@@ -367,6 +373,8 @@
         selectedKey.value = 'document';
         spinning.value = false;
         notHit.value = false;
+        type.value = data.type;
+        knowledgeMetadata.value = data.knowledgeMetadata || '';
         await reload();
         setModalProps({ confirmLoading: false });
       });
@@ -402,22 +410,27 @@
        * 手工录入文本
        */
       function handleCreateText() {
-        docTextOpenModal(true, { knowledgeId: knowledgeId.value, type: "text" });
+        //update-begin---wangshuai---date:20260414  for：【QQYUN-14932】创建知识库时，可以创建一个分段策略，知识库里面的文档默认使用知识库的分段策略------------
+        docTextOpenModal(true, { knowledgeId: knowledgeId.value, type: "text", knowledgeMetadata: knowledgeMetadata.value, knowledgeType: type.value });
+        //update-end---wangshuai---date:20260414  for：【QQYUN-14932】创建知识库时，可以创建一个分段策略，知识库里面的文档默认使用知识库的分段策略------------
       }
 
       /**
        * 文件上传
        */
       function handleCreateUpload() {
-        console.log("11111111111")
-        docTextOpenModal(true, { knowledgeId: knowledgeId.value, type: "file" });
+        //update-begin---wangshuai---date:20260414  for：【QQYUN-14932】创建知识库时，可以创建一个分段策略，知识库里面的文档默认使用知识库的分段策略------------
+        docTextOpenModal(true, { knowledgeId: knowledgeId.value, type: "file", knowledgeMetadata: knowledgeMetadata.value, knowledgeType: type.value });
+        //update-end---wangshuai---date:20260414  for：【QQYUN-14932】创建知识库时，可以创建一个分段策略，知识库里面的文档默认使用知识库的分段策略------------
       }
 
       /**
        * web网络地址
        */
       function handleCreateWeb() {
-        createMessage.warning('功能正在完善中....');
+        //update-begin---wangshuai---date:20260414  for：【QQYUN-14932】创建知识库时，可以创建一个分段策略，知识库里面的文档默认使用知识库的分段策略------------
+        docTextOpenModal(true, { knowledgeId: knowledgeId.value, type: "web", knowledgeMetadata: knowledgeMetadata.value, knowledgeType: type.value });
+        //update-end---wangshuai---date:20260414  for：【QQYUN-14932】创建知识库时，可以创建一个分段策略，知识库里面的文档默认使用知识库的分段策略------------
       }
 
       /**
@@ -431,10 +444,12 @@
         }
 
 
-        if (record.type === 'text' || record.type === 'file') {
+        if (record.type === 'text' || record.type === 'file' || record.type === 'web') {
           docTextOpenModal(true, {
             record,
             isUpdate: true,
+            knowledgeMetadata: knowledgeMetadata.value,
+            knowledgeType: type.value,
           });
         }
       }
@@ -718,6 +733,7 @@
         handleCreateText,
         beforeUpload,
         handleCreateUpload,
+        handleCreateWeb,
         handleSuccess,
         contentStyle,
         siderStyle,
@@ -762,6 +778,7 @@
         onDeleteAll,
         onDeleteBatch,
         searchTextEnter,
+        type,
       };
     },
   };
@@ -888,7 +905,7 @@
     margin-bottom: 20px;
     display: inline-flex;
     font-size: 16px;
-    height: 166px;
+    height: 196px;
     width: calc(100% - 20px);
     background: #fcfcfd;
     border: 1px solid #f0f0f0;
@@ -904,7 +921,7 @@
     border-radius: 10px;
     margin-right: 20px;
     margin-bottom: 20px;
-    height: 166px;
+    height: 196px;
     background: #fcfcfd;
     border: 1px solid #f0f0f0;
     box-shadow: 0 2px 4px #e6e6e6;

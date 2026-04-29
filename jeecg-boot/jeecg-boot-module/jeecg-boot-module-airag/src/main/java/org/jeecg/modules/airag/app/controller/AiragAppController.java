@@ -16,13 +16,17 @@ import org.jeecg.modules.airag.app.consts.AiAppConsts;
 import org.jeecg.modules.airag.app.entity.AiragApp;
 import org.jeecg.modules.airag.app.service.IAiragAppService;
 import org.jeecg.modules.airag.app.service.IAiragChatService;
+import org.jeecg.modules.airag.app.vo.AiArticleWriteVersionVo;
 import org.jeecg.modules.airag.app.vo.AppDebugParams;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 import jakarta.servlet.http.HttpServletRequest;
-import java.util.Arrays;
+import org.jeecg.common.system.vo.DictModel;
 
 /**
  * @Description: AI应用
@@ -61,6 +65,25 @@ public class AiragAppController extends JeecgController<AiragApp, IAiragAppServi
     }
 
     /**
+     * 字典列表查询（不分页，按创建时间倒序）
+     *
+     * @param airagApp 支持通过实体字段动态过滤，如 type 等
+     * @param req HTTP请求
+     * @return 应用字典列表
+     */
+    @GetMapping(value = "/listDict")
+    public Result<List<DictModel>> listDict(AiragApp airagApp, HttpServletRequest req) {
+        QueryWrapper<AiragApp> queryWrapper = QueryGenerator.initQueryWrapper(airagApp, req.getParameterMap());
+        queryWrapper.select("id", "name");
+        queryWrapper.orderByDesc("create_time");
+        List<AiragApp> list = airagAppService.list(queryWrapper);
+        List<DictModel> dictList = list.stream()
+            .map(app -> new DictModel(app.getId(), app.getName()))
+            .collect(Collectors.toList());
+        return Result.OK(dictList);
+    }
+
+    /**
      * 新增或编辑
      *
      * @param airagApp
@@ -68,10 +91,24 @@ public class AiragAppController extends JeecgController<AiragApp, IAiragAppServi
      */
     @RequestMapping(value = "/edit", method = {RequestMethod.PUT, RequestMethod.POST})
     @RequiresPermissions("airag:app:edit")
-    public Result<String> edit(@RequestBody AiragApp airagApp) {
+    public Result<String> edit(@RequestBody AiragApp airagApp, HttpServletRequest request) {
         AssertUtils.assertNotEmpty("参数异常", airagApp);
         AssertUtils.assertNotEmpty("请输入应用名称", airagApp.getName());
         AssertUtils.assertNotEmpty("请选择应用类型", airagApp.getType());
+        //update-begin---author:zhangdaihao ---date:20260415  for：[issues/9462]AI应用edit接口跨租户数据写入漏洞------------
+        //SaaS多租户隔离：禁止跨租户写入，防止通过请求体伪造tenantId污染其他租户数据
+        if (MybatisPlusSaasConfig.OPEN_SYSTEM_TENANT_CONTROL) {
+            String currentTenantId = TokenUtils.getTenantIdByRequest(request);
+            if (airagApp.getId() != null && !airagApp.getId().isEmpty()) {
+                AiragApp dbApp = airagAppService.getById(airagApp.getId());
+                if (dbApp == null || !dbApp.getTenantId().equals(currentTenantId)) {
+                    return Result.error("保存AI应用失败，不能修改其他租户的AI应用！");
+                }
+            }
+            //强制使用当前登录租户，忽略客户端传入值
+            airagApp.setTenantId(currentTenantId);
+        }
+        //update-end---author:zhangdaihao ---date:20260415  for：[issues/9462]AI应用edit接口跨租户数据写入漏洞------------
         airagApp.setStatus(AiAppConsts.STATUS_ENABLE);
         airagAppService.saveOrUpdate(airagApp);
         return Result.OK("保存完成!", airagApp.getId());
@@ -179,4 +216,43 @@ public class AiragAppController extends JeecgController<AiragApp, IAiragAppServi
         return (SseEmitter) airagAppService.generatePrompt(prompt,false);
     }
 
+    /**
+     * 根据应用ID生成变量和记忆提示词 (SSE)
+     * for: 【QQYUN-14479】提示词单独拆分
+     * @param variables
+     * @return
+     */
+    @PostMapping(value = "/prompt/generateMemoryByAppId")
+    public SseEmitter generatePromptByAppIdSse(@RequestParam(name = "variables") String variables,
+                                               @RequestParam(name = "memoryId") String memoryId) {
+        return (SseEmitter) airagAppService.generateMemoryByAppId(variables, memoryId,false);
+    }
+
+    /**
+     * 写作保存
+     */
+    @PostMapping("/save/article/write")
+    public Result<String> saveArticleWrite(@RequestBody AiArticleWriteVersionVo aiWriteVersionVo) {
+        airagAppService.saveArticleWrite(aiWriteVersionVo);
+        return Result.OK("保存成功！");
+    }
+    
+    /**
+     * 写作删除
+     */
+    @DeleteMapping("/delete/article/write")
+    public Result<String> deleteArticleWrite(@RequestParam(name = "version") String version) {
+        AssertUtils.assertNotEmpty("版本号不能为空", version);
+        airagAppService.deleteArticleWrite(version);
+        return Result.OK("删除成功！");
+    }
+    
+    /**
+     * 写作查询
+     */
+    @GetMapping("/list/article/write")
+    public Result<List<AiArticleWriteVersionVo>> listArticleWrite() {
+        List<AiArticleWriteVersionVo> list = airagAppService.listArticleWrite();
+        return Result.OK(list);
+    }
 }

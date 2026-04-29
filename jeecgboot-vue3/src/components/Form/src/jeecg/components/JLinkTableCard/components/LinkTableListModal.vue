@@ -36,8 +36,8 @@
         <div v-html="text"></div>
       </template>
 
-      <template #pcaSlot="{ text }">
-        <div :title="getPcaText(text)">{{ getPcaText(text) }}</div>
+      <template #pcaSlot="{ text, column }">
+        <div :title="getPcaText(text, column)">{{ getPcaText(text, column) }}</div>
       </template>
 
       <template #dateSlot="{ text, column }">

@@ -71,6 +71,7 @@ import org.springframework.util.PathMatcher;
 import jakarta.annotation.Resource;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import javax.sql.DataSource;
 import java.io.IOException;
@@ -370,6 +371,11 @@ public class SysBaseApiImpl implements ISysBaseAPI {
 	}
 
 	@Override
+	public Map<String, List<String>> getDepartIdsByUserIds(Collection<String> userIds) {
+		return sysDepartService.queryDepartIdsByUserIds(userIds);
+	}
+
+	@Override
 	public Set<String> getDepartParentIdsByUsername(String username) {
 		List<SysDepart> list = sysDepartService.queryDepartsByUsername(username);
 		Set<String> result = new HashSet<>(list.size());
@@ -401,6 +407,29 @@ public class SysBaseApiImpl implements ISysBaseAPI {
 			result.add(depart.getDepartName());
 		}
 		return result;
+	}
+
+	@Override
+	@Cacheable(cacheNames = CacheConstant.SYS_USERS_CACHE, key = "#username + '::main_depart_info'", unless = "#result == null")
+	public SysDepartModel queryMainDepartByUsername(String username) {
+		if (oConvertUtils.isEmpty(username)) {
+			return null;
+		}
+		// 根据用户名查询主部门信息
+		SysDepart mainDepart = userMapper.getMainDepartByUsername(username);
+		if (mainDepart == null) {
+			return null;
+		}
+
+		// 复制部门信息到模型对象
+		SysDepartModel model = new SysDepartModel();
+		BeanUtils.copyProperties(mainDepart, model);
+
+		// 设置部门路径名称
+		String departPathName = sysDepartService.getDepartPathNameByOrgCode(model.getOrgCode(), null);
+		model.setDepartPathName(departPathName);
+
+		return model;
 	}
 
 	@Override
@@ -639,6 +668,13 @@ public class SysBaseApiImpl implements ISysBaseAPI {
 			dingtalkService.sendActionCardMessage(announcement, mobileOpenUrl, true);
 			// 企业微信通知
 			wechatEnterpriseService.sendTextCardMessage(announcement, mobileOpenUrl, true);
+			// Uniapp手机端消息推送
+			PushMessageDTO pushMessageDTO = new PushMessageDTO();
+			pushMessageDTO.setTitle(announcement.getTitile());
+			pushMessageDTO.setContent(announcement.getMsgContent());
+			pushMessageDTO.setPayload(new HashMap<>(message.getTemplateParam()));
+			pushMessageDTO.setUsernames(Arrays.asList(toUser));
+			this.uniPushMsgToUser(pushMessageDTO);
 		} catch (Exception e) {
 			log.error("同步发送第三方APP消息失败！", e);
 		}
@@ -2112,6 +2148,14 @@ public class SysBaseApiImpl implements ISysBaseAPI {
         return o.getResult();
     }
 
+	@Override
+	public SseEmitter runAiragFlowStream(AiragFlowDTO airagFlowDTO) {
+		if (oConvertUtils.isEmpty(airagFlowDTO.getFlowId())) {
+			throw new JeecgBootException("流程ID不能为空");
+		}
+		return airagFlowService.runFlowStream(airagFlowDTO);
+	}
+
 	/**
 	 * uniPush推送消息给APP用户
 	 * @param pushMessageDTO
@@ -2163,7 +2207,7 @@ public class SysBaseApiImpl implements ISysBaseAPI {
 				log.error("{} UniPush消息推送失败 返回response:{}", pushType, response.getBody());
 			}
 		} catch (RestClientException e) {
-			log.warn("UniAPP 消息推送异常："+ e.getMessage(), e);
+			log.warn("UniAPP 消息推送异常："+ e.getMessage());
 		}
 	}
 	/**

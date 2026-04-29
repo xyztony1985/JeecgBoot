@@ -17,6 +17,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.shiro.SecurityUtils;
+import org.apache.shiro.UnavailableSecurityManagerException;
 import org.jeecg.common.api.dto.message.MessageDTO;
 import org.jeecg.common.api.vo.Result;
 import org.jeecg.common.config.TenantContext;
@@ -3033,6 +3034,31 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
 		sysUser.setClientId(clientId);
 		sysUser.setId(userId);
 		this.baseMapper.updateById(sysUser);
+	}
+
+	/**
+	 * 根据用户组查询用户列表
+	 * @param page
+	 * @param groupId
+	 * @param username
+	 * @param realname
+	 * @return
+	 */
+	@Override
+	public IPage<SysUser> getUserByUgroupId(Page<SysUser> page, String groupId, String username, String realname) {
+		IPage<SysUser> userGroupList = userMapper.getUserByUgroupId(page, groupId, username,realname);
+		List<SysUser> records = userGroupList.getRecords();
+		if (null != records && records.size() > 0) {
+			List<String> userIds = records.stream().map(SysUser::getId).collect(Collectors.toList());
+			Map<String, String> useDepNames = this.getDepNamesByUserIds(userIds);
+			for (SysUser sysUser : userGroupList.getRecords()) {
+				//设置部门
+				sysUser.setOrgCodeTxt(useDepNames.get(sysUser.getId()));
+				//设置用户职位id
+				this.userPositionId(sysUser);
+			}
+		}
+		return userGroupList;
 	}
 
 	/**

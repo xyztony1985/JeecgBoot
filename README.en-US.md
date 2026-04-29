@@ -1,4 +1,4 @@
-[中文](./README.md) | English
+[中文](./README.md) | English | [日本語](./README.ja-JP.md)
 
 ![JEECG](https://jeecgos.oss-cn-beijing.aliyuncs.com/files/logov3.png "JeecgBoot低代码开发平台")
 
@@ -7,15 +7,25 @@
 JEECG BOOT AI Low Code Platform
 ===============
 
-Current version: 3.9.0 (Release date: 2025-12-01)
+Current version: 3.9.1 (Release date: 2026-01-28)
 
 
 [![AUR](https://img.shields.io/badge/license-Apache%20License%202.0-blue.svg)](https://github.com/zhangdaiscott/jeecg-boot/blob/master/LICENSE)
 [![](https://img.shields.io/badge/Author-guojusoft-orange.svg)](http://www.jeecg.com)
-[![](https://img.shields.io/badge/version-3.9.0-brightgreen.svg)](https://github.com/zhangdaiscott/jeecg-boot)
+[![](https://img.shields.io/badge/blog-Tech%20Blog-orange.svg)](https://www.toutiao.com/c/user/token/CiZtC9Gn_yl2qDcTF9Kqhh9LV7tW1cJsdRn2rfFUU5lZy4RJaD4hdBpJCjwAAAAAAAAAAAAAUFvsvy4j57fg5tqwVmxukKxGEhbMl7pE14lY9_YSDq-A26V7xrG3hYuq_Z9y6F3W01oQkIKQDhjDxYPqBCIBA2iiHh0=)
+[![](https://img.shields.io/badge/version-3.9.1-brightgreen.svg)](https://github.com/zhangdaiscott/jeecg-boot)
 [![GitHub stars](https://img.shields.io/github/stars/zhangdaiscott/jeecg-boot.svg?style=social&label=Stars)](https://github.com/zhangdaiscott/jeecg-boot)
 [![GitHub forks](https://img.shields.io/github/forks/zhangdaiscott/jeecg-boot.svg?style=social&label=Fork)](https://github.com/zhangdaiscott/jeecg-boot)
+[![Skills](https://img.shields.io/badge/AI%20Skills-Natural%20Language%20Coding-ff4d4f.svg)](https://jeecg.com/skills)
 
+
+> 🔥 **AI Skills — Natural Language Programming**: paired with Claude Code, generate full-stack code, BPMN flows, forms, reports and dashboards from a single sentence. Covering every JeecgBoot low-code scenario.
+>
+> - 📦 Skills repo: **https://github.com/jeecgboot/skills**
+> - 🌐 Skills site: **https://jeecg.com/skills**
+> - 📺 Demo: [JeecgBoot + Skills Natural Language Coding](https://www.bilibili.com/video/BV1KKwTzJEbX/) ｜ 📖 Docs: [Skill Comparison](https://help.jeecg.com/java/ai/skills/skill-comparison/)
+>
+> **What can Skills do?** One sentence to: generate full CRUD code (frontend + backend + SQL + menu permissions) · create Online Form / Online Report / Designer Form · draw BPMN flows · build big-screen dashboards · generate JimuReport, portals, mini-flows and more.
 
 
 Project introduction
@@ -301,6 +311,41 @@ AI APP: https://help.jeecg.com/aigc
 
 
 ##### PC
+
+##### AI Model and Application Management
+
+![](https://oscimg.oschina.net/oscnet/up-0b1779e923566ccebb2d5a9cc9220c78b4a.png)
+
+![](https://oscimg.oschina.net/oscnet/up-c8956df1d37d66b2d40136afaeca677628b.png)
+
+![](https://oscimg.oschina.net/oscnet/up-8c348eeafd89673ca8cd1a2705014e3ac04.png)
+
+AI Workflow Orchestration
+
+![](https://oscimg.oschina.net/oscnet/up-2343657de2c7ac8010bc471470d084075ae.png)
+
+MCP and Tool Management
+
+![](https://oscimg.oschina.net/oscnet/up-8119d5dbc72e534236a3d042e11534c52ad.png)
+
+AI Knowledge Base (Supports various document formats, with excellent markdown compatibility)
+
+![](https://oscimg.oschina.net/oscnet/up-e2e9c118982ea366ed7f2b9827d4bb46c5d.png)
+
+AI Toolbox
+
+![](https://oscimg.oschina.net/oscnet/up-bf2a808d22a11fd83e577ad74741d97884b.png)
+
+AI Chat Assistant
+
+![](https://oscimg.oschina.net/oscnet/up-2a51accc2ff0b647e0ee058a58d291fe811.png)
+
+![](https://oscimg.oschina.net/oscnet/up-ea1069c2a92a3ab2963d88763016cb037c2.png)
+
+![](https://oscimg.oschina.net/oscnet//65298d5710b4e6039a5f802b5f8505c5.png)
+
+
+
 ![](https://oscimg.oschina.net/oscnet/up-000530d95df337b43089ac77e562494f454.png)
 
 ![输入图片说明](https://static.oschina.net/uploads/img/201904/14155402_AmlV.png "在这里输入图片标题")
@@ -422,3 +467,23 @@ AI APP: https://help.jeecg.com/aigc
 If so, buy the author a cup of coffee ☺
 
 ![](https://static.oschina.net/uploads/img/201903/08155608_0EFX.png)
+
+
+## Disclaimer
+
+JeecgBoot is released under the [Apache License 2.0](./LICENSE). Please read the following disclaimer carefully before using this software:
+
+1. **Provided "AS IS"**  
+   This software and its related documentation are provided "AS IS", without warranty of any kind, express or implied, including but not limited to warranties of merchantability, fitness for a particular purpose, and non-infringement.
+
+2. **Use at Your Own Risk**  
+   Users shall evaluate whether this software meets their own business scenarios, and shall bear all risks arising from downloading, installing, using, modifying, or further developing this software, including but not limited to data loss, business interruption, loss of revenue, or any other form of damage.
+
+3. **Limitation of Liability**  
+   To the maximum extent permitted by applicable law, the authors, contributors, and copyright holders of JeecgBoot shall not be liable for any direct, indirect, incidental, special, punitive, or consequential damages suffered by users or any third party arising from the use of this software.
+
+4. **Community Request**  
+   While the Apache License 2.0 grants full rights to use, modify, and redistribute this software, we kindly request that derivative works refrain from directly replicating, misrepresenting themselves as official JeecgBoot releases, or using names/branding highly similar to JeecgBoot.
+
+By downloading, copying, installing, or otherwise using this software, you are deemed to have read, understood, and agreed to the foregoing disclaimer.
+

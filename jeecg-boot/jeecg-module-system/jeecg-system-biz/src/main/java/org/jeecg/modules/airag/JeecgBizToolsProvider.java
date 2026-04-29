@@ -9,12 +9,12 @@ import dev.langchain4j.agent.tool.ToolSpecification;
 import dev.langchain4j.model.chat.request.json.JsonObjectSchema;
 import dev.langchain4j.service.tool.ToolExecutor;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.shiro.SecurityUtils;
 import org.jeecg.common.constant.CommonConstant;
 import org.jeecg.common.util.PasswordUtil;
 import org.jeecg.common.util.oConvertUtils;
 import org.jeecg.modules.airag.llm.handler.JeecgToolsProvider;
 import org.jeecg.modules.base.service.BaseCommonService;
-import org.jeecg.modules.system.controller.SysUserController;
 import org.jeecg.modules.system.entity.SysRole;
 import org.jeecg.modules.system.entity.SysUser;
 import org.jeecg.modules.system.mapper.SysUserMapper;
@@ -36,9 +36,6 @@ import java.util.Map;
 public class JeecgBizToolsProvider implements JeecgToolsProvider {
 
     @Autowired
-    SysUserController sysUserController;
-
-    @Autowired
     SysUserMapper userMapper;
 
     @Autowired
@@ -53,18 +50,31 @@ public class JeecgBizToolsProvider implements JeecgToolsProvider {
     @Autowired
     private org.jeecg.modules.system.service.ISysUserService sysUserService;
 
-    public Map<ToolSpecification, ToolExecutor> getDefaultTools(){
+    public Map<ToolSpecification, ToolExecutor> getDefaultTools() {
         Map<ToolSpecification, ToolExecutor> tools = new HashMap<>();
-        JeecgLlmTools userTool = queryUserTool();
-        tools.put(userTool.getToolSpecification(), userTool.getToolExecutor());
-        JeecgLlmTools addUser = addUserTool();
-        tools.put(addUser.getToolSpecification(), addUser.getToolExecutor());
-        // 新增：查询所有角色
-        JeecgLlmTools queryRoles = queryAllRolesTool();
-        tools.put(queryRoles.getToolSpecification(), queryRoles.getToolExecutor());
-        // 新增：给用户授予角色
-        JeecgLlmTools grantRoles = grantUserRolesTool();
-        tools.put(grantRoles.getToolSpecification(), grantRoles.getToolExecutor());
+
+        if (SecurityUtils.getSubject().isPermitted("system:user:list")) {
+            JeecgLlmTools userTool = queryUserTool();
+            tools.put(userTool.getToolSpecification(), userTool.getToolExecutor());
+        }
+
+        if (SecurityUtils.getSubject().isPermitted("system:user:add")) {
+            JeecgLlmTools addUser = addUserTool();
+            tools.put(addUser.getToolSpecification(), addUser.getToolExecutor());
+        }
+
+        if (SecurityUtils.getSubject().isPermitted("system:role:list")) {
+            // 新增：查询所有角色
+            JeecgLlmTools queryRoles = queryAllRolesTool();
+            tools.put(queryRoles.getToolSpecification(), queryRoles.getToolExecutor());
+        }
+
+        if (SecurityUtils.getSubject().isPermitted("system:user:addUserRole")) {
+            // 新增：给用户授予角色
+            JeecgLlmTools grantRoles = grantUserRolesTool();
+            tools.put(grantRoles.getToolSpecification(), grantRoles.getToolExecutor());
+        }
+
         return tools;
     }
 
@@ -82,7 +92,7 @@ public class JeecgBizToolsProvider implements JeecgToolsProvider {
                         "\n\n - 你应该提前判断用户的输入是否合法,比如用户名是否符合规范,手机号和邮箱是否正确等." +
                         "\n\n - 提前使用用户名查询用户是否存在,如果存在则不能添加." +
                         "\n\n - 添加成功后返回成功消息,如果失败则返回失败原因." +
-                        "\n\n - 用户名,邮箱,手机号均要求唯一,提前通过查询用户工具确认唯一性." )
+                        "\n\n - 用户名,手机号均要求唯一,提前通过查询用户工具确认唯一性." )
                 .parameters(
                         JsonObjectSchema.builder()
                                 .addStringProperty("username", "用户名,必填,只允许使用字母、数字、下划线，且必须以字母开头,唯一")
@@ -90,11 +100,19 @@ public class JeecgBizToolsProvider implements JeecgToolsProvider {
                                 .addStringProperty("realname", "真实姓名,必填")
                                 //.addStringProperty("email", "邮箱,必填,唯一")
                                 .addStringProperty("phone", "手机号,必填,唯一")
-                                .required("username","password","realname","workNo","email","phone")
+                                .required("username","password","realname","phone")
                                 .build()
                 )
                 .build();
+
+        // 在主线程（Shiro上下文可用）提前检查权限
+        final boolean hasAddPermission = SecurityUtils.getSubject().isPermitted("system:user:add");
+
         ToolExecutor toolExecutor = (toolExecutionRequest, memoryId) -> {
+            // 权限校验（使用提前捕获的结果，避免在异步线程中调用 Shiro）
+            if (!hasAddPermission) {
+                return "无权限：您没有添加用户的权限（system:user:add）";
+            }
             JSONObject arguments = JSONObject.parseObject(toolExecutionRequest.arguments());
             arguments.put("confirmPassword",arguments.get("password"));
             arguments.put("userIdentity",1);
@@ -122,6 +140,7 @@ public class JeecgBizToolsProvider implements JeecgToolsProvider {
                 msg = "添加用户成功";
                 // 用户变更，触发同步工作流
             } catch (Exception e) {
+                e.printStackTrace();
                 msg = "添加用户失败";
             }
             return msg;
@@ -149,7 +168,15 @@ public class JeecgBizToolsProvider implements JeecgToolsProvider {
                                 .build()
                 )
                 .build();
+
+        // 在主线程（Shiro上下文可用）提前检查权限
+        final boolean hasListPermission = SecurityUtils.getSubject().isPermitted("system:user:list");
+
         ToolExecutor toolExecutor = (toolExecutionRequest, memoryId) -> {
+            // 权限校验（使用提前捕获的结果，避免在异步线程中调用 Shiro）
+            if (!hasListPermission) {
+                return "无权限：您没有查询用户列表的权限";
+            }
             SysUser args = JSONObject.parseObject(toolExecutionRequest.arguments(), SysUser.class);
             QueryWrapper<SysUser> qw = new QueryWrapper<>();
             if (StringUtils.isNotBlank(args.getUsername())) {
@@ -192,7 +219,15 @@ public class JeecgBizToolsProvider implements JeecgToolsProvider {
                                 .build()
                 )
                 .build();
+
+        // 在主线程（Shiro上下文可用）提前检查权限
+        final boolean hasRoleListPermission = SecurityUtils.getSubject().isPermitted("system:role:list");
+
         ToolExecutor exec = (toolExecutionRequest, memoryId) -> {
+            // 权限校验（使用提前捕获的结果，避免在异步线程中调用 Shiro）
+            if (!hasRoleListPermission) {
+                return "无权限：您没有查询角色列表的权限";
+            }
             // 做租户隔离查询（若开启）
             SysRole sysRole = JSONObject.parseObject(toolExecutionRequest.arguments(), SysRole.class);
             QueryWrapper<SysRole> qw = Wrappers.query();
@@ -203,10 +238,10 @@ public class JeecgBizToolsProvider implements JeecgToolsProvider {
                 qw.like("role_code", sysRole.getRoleCode());
             }
             // 未删除
-            List<org.jeecg.modules.system.entity.SysRole> roles = sysRoleService.list(qw);
+            List<SysRole> roles = sysRoleService.list(qw);
             // 仅返回核心字段
             JSONArray arr = new JSONArray();
-            for (org.jeecg.modules.system.entity.SysRole r : roles) {
+            for (SysRole r : roles) {
                 JSONObject o = new JSONObject();
                 o.put("id", r.getId());
                 o.put("roleName", r.getRoleName());
@@ -236,14 +271,23 @@ public class JeecgBizToolsProvider implements JeecgToolsProvider {
                                 .build()
                 )
                 .build();
+
+        // 在主线程（Shiro上下文可用）提前检查权限
+        final boolean hasGrantPermission = SecurityUtils.getSubject().isPermitted("system:user:addUserRole")
+                || SecurityUtils.getSubject().isPermitted("system:user:edit");
+
         ToolExecutor exec = (toolExecutionRequest, memoryId) -> {
+            // 权限校验（使用提前捕获的结果，避免在异步线程中调用 Shiro）
+            if (!hasGrantPermission) {
+                return "无权限：您没有给用户授予角色的权限";
+            }
             JSONObject args = JSONObject.parseObject(toolExecutionRequest.arguments());
             String userId = args.getString("userId");
             String roleIdsStr = args.getString("roleIds");
-            if (org.apache.commons.lang3.StringUtils.isAnyBlank(userId, roleIdsStr)) {
+            if (StringUtils.isAnyBlank(userId, roleIdsStr)) {
                 return "参数缺失：userId 或 roleIds";
             }
-            org.jeecg.modules.system.entity.SysUser user = sysUserService.getById(userId);
+            SysUser user = sysUserService.getById(userId);
             if (user == null) {
                 return "用户不存在：" + userId;
             }
@@ -252,9 +296,9 @@ public class JeecgBizToolsProvider implements JeecgToolsProvider {
             for (String roleId : roleIds) {
                 roleId = roleId.trim();
                 if (roleId.isEmpty()) continue;
-                org.jeecg.modules.system.entity.SysRole role = sysRoleService.getById(roleId);
+                SysRole role = sysRoleService.getById(roleId);
                 if (role == null) { invalid++; continue; }
-                com.baomidou.mybatisplus.core.conditions.query.QueryWrapper<org.jeecg.modules.system.entity.SysUserRole> q = new com.baomidou.mybatisplus.core.conditions.query.QueryWrapper<>();
+                QueryWrapper<org.jeecg.modules.system.entity.SysUserRole> q = new QueryWrapper<>();
                 q.eq("role_id", roleId).eq("user_id", userId);
                 org.jeecg.modules.system.entity.SysUserRole one = sysUserRoleService.getOne(q);
                 if (one == null) {

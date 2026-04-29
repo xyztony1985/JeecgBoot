@@ -3,6 +3,7 @@ node_modules
 .github
 dist
 .cache
+.playwright-mcp
 
 tests/server/static
 tests/server/static/upload
@@ -30,5 +31,7 @@ pnpm-debug.log*
 *.sw?
 /os_del.cmd
 os_del.cmd
+/.vscode/
 /.history/
 /svn clear.bat
+.claude
