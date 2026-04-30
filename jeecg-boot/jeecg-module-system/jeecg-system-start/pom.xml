@@ -55,6 +55,10 @@
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
+                <configuration>
+                    <!-- 覆盖父配置，启用 run -->
+                    <skip>false</skip>
+                </configuration>
             </plugin>
         </plugins>
     </build>
