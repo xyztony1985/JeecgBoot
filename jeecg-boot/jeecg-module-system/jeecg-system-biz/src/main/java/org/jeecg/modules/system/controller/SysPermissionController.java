@@ -95,8 +95,9 @@ public class SysPermissionController {
 		List<SysPermission> list = sysPermissionService.list(query);
 		List<SysPermissionTree> treeList = new ArrayList<>();
 
-		// 如果有菜单名查询条件，则平铺数据 不做上下级
-		if (oConvertUtils.isNotEmpty(sysPermission.getName())) {
+		// 如果有查询条件，则平铺数据 不做上下级
+		// request.getParameterMap() 固定有这 3 项（column、order、_t），多出 3 项，则说明有查询条件
+		if (req.getParameterMap().size() > 3) {
 			if (list != null && list.size() > 0) {
 				treeList = list.stream().map(e -> {
 					e.setLeaf(true);
