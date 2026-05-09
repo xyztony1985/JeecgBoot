@@ -40,14 +40,14 @@ export const columns: BasicColumn[] = [
     },
   },
   {
-    title: '组件',
-    dataIndex: 'component',
+    title: '访问路径',
+    dataIndex: 'url',
     align: 'left',
     width: 150,
   },
   {
-    title: '路径',
-    dataIndex: 'url',
+    title: '前端组件',
+    dataIndex: 'component',
     align: 'left',
     width: 150,
   },
@@ -62,17 +62,17 @@ export const searchFormSchema: FormSchema[] = [
   {
     field: 'name',
     label: '菜单名称',
-    component: 'Input',
+    component: 'JInput',
   },
   {
     field: 'url',
     label: '访问路径',
-    component: 'Input'
+    component: 'JInput'
   },
   {
     field: 'component',
     label: '前端组件',
-    component: 'Input',
+    component: 'JInput',
   },
 ];
 
@@ -119,12 +119,6 @@ export const formSchema: FormSchema[] = [
     },
   },
   {
-    field: 'name',
-    label: '菜单名称',
-    component: 'Input',
-    required: true,
-  },
-  {
     field: 'parentId',
     label: '上级菜单',
     component: 'TreeSelect',
@@ -142,6 +136,12 @@ export const formSchema: FormSchema[] = [
       getPopupContainer: (node) => node?.parentNode,
     },
     ifShow: ({ values }) => !isDir(values.menuType),
+  },
+  {
+    field: 'name',
+    label: '菜单名称',
+    component: 'Input',
+    required: true,
   },
   {
     field: 'url',
@@ -277,7 +277,7 @@ export const formSchema: FormSchema[] = [
   },
   {
     field: 'route',
-    label: '是否路由菜单',
+    label: '路由菜单',
     component: 'Switch',
     defaultValue: true,
     componentProps: {
@@ -286,7 +286,7 @@ export const formSchema: FormSchema[] = [
     },
     ifShow: ({ values }) => !isButton(values.menuType),
     helpMessage: [
-      '以嵌方式打开，必须选是',
+      '以内嵌方式打开，必须选是',
     ],
   },
   {
@@ -313,7 +313,7 @@ export const formSchema: FormSchema[] = [
   },
   {
     field: 'keepAlive',
-    label: '是否缓存路由',
+    label: '缓存路由',
     component: 'Switch',
     defaultValue: false,
     componentProps: {
