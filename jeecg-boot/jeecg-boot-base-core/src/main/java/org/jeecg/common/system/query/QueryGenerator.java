@@ -90,11 +90,7 @@ public class QueryGenerator {
 	 * @return QueryWrapper实例
 	 */
 	public static <T> QueryWrapper<T> initQueryWrapper(T searchObj,Map<String, String[]> parameterMap){
-		long start = System.currentTimeMillis();
-		QueryWrapper<T> queryWrapper = new QueryWrapper<T>();
-		installMplus(queryWrapper, searchObj, parameterMap, null);
-		log.debug("---查询条件构造器初始化完成,耗时:"+(System.currentTimeMillis()-start)+"毫秒----");
-		return queryWrapper;
+		return initQueryWrapper(searchObj, parameterMap, null);
 	}
 	
 	/**
@@ -162,6 +158,13 @@ public class QueryGenerator {
 					continue;
 				}
 				fieldColumnMap.put(name,column);
+
+				// 字段不在请求参数中的，不处理 20260508
+				// 未充分验证，可能会有问题，比如：key 名现在是大小写敏感
+				if (!parameterMap.containsKey(name)) {
+					continue;
+				}
+
 				//数据权限查询
 				if(ruleMap.containsKey(name)) {
 					addRuleToQueryWrapper(ruleMap.get(name), column, origDescriptors[i].getPropertyType(), queryWrapper);

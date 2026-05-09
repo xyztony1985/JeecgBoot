@@ -12,6 +12,7 @@ import org.jeecg.common.api.vo.Result;
 import org.jeecg.common.constant.CommonConstant;
 import org.jeecg.common.constant.SymbolConstant;
 import org.jeecg.common.exception.JeecgBootException;
+import org.jeecg.common.system.query.QueryGenerator;
 import org.jeecg.common.system.vo.LoginUser;
 import org.jeecg.common.util.Md5Util;
 import org.jeecg.common.util.oConvertUtils;
@@ -86,39 +87,29 @@ public class SysPermissionController {
 	public Result<List<SysPermissionTree>> list(SysPermission sysPermission, HttpServletRequest req) {
         long start = System.currentTimeMillis();
 		Result<List<SysPermissionTree>> result = new Result<>();
-		try {
-			LambdaQueryWrapper<SysPermission> query = new LambdaQueryWrapper<SysPermission>();
-			query.eq(SysPermission::getDelFlag, CommonConstant.DEL_FLAG_0);
-			query.orderByAsc(SysPermission::getSortNo);
-			
-			//支持通过菜单名字或url，模糊查询
-			if(oConvertUtils.isNotEmpty(sysPermission.getName())){
-				query.and(wrapper -> wrapper
-					.like(SysPermission::getName, sysPermission.getName())
-					.or()
-					.like(SysPermission::getUrl, sysPermission.getName())
-				);
-			}
-			List<SysPermission> list = sysPermissionService.list(query);
-			List<SysPermissionTree> treeList = new ArrayList<>();
 
-			//如果有菜单名查询条件，则平铺数据 不做上下级
-			if(oConvertUtils.isNotEmpty(sysPermission.getName())){
-				if(list!=null && list.size()>0){
-					treeList = list.stream().map(e -> {
-						e.setLeaf(true);
-						return new SysPermissionTree(e);
-					}).collect(Collectors.toList());
-				}
-			}else{
-				getTreeList(treeList, list, null);
+		QueryWrapper<SysPermission> query = QueryGenerator.initQueryWrapper(sysPermission, req.getParameterMap());
+		query.eq("del_flag", 0);
+		query.orderByAsc("sort_no");
+
+		List<SysPermission> list = sysPermissionService.list(query);
+		List<SysPermissionTree> treeList = new ArrayList<>();
+
+		// 如果有菜单名查询条件，则平铺数据 不做上下级
+		if (oConvertUtils.isNotEmpty(sysPermission.getName())) {
+			if (list != null && list.size() > 0) {
+				treeList = list.stream().map(e -> {
+					e.setLeaf(true);
+					return new SysPermissionTree(e);
+				}).collect(Collectors.toList());
 			}
-			result.setResult(treeList);
-			result.setSuccess(true);
-            log.debug("======获取全部菜单数据=====耗时:" + (System.currentTimeMillis() - start) + "毫秒");
-		} catch (Exception e) {
-			log.error(e.getMessage(), e);
+		} else {
+			getTreeList(treeList, list, null);
 		}
+		result.setResult(treeList);
+		result.setSuccess(true);
+		log.debug("======获取全部菜单数据=====耗时:" + (System.currentTimeMillis() - start) + "毫秒");
+
 		return result;
 	}
 
