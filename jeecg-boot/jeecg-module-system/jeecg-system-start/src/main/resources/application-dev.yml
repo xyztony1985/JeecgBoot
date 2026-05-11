@@ -281,6 +281,7 @@ jeecg:
   domainUrl:
     pc: http://localhost:3100
     app: http://localhost:8051
+    api: http://8.134.187.111:13100/jeecgboot
   path:
     #文件上传根目录 设置
     upload: /opt/upFiles
@@ -376,6 +377,7 @@ logging:
     org.flywaydb: debug
     org.jeecg.modules.system.mapper: info
     org.jeecg.modules.demo.test.mapper: info
+    org.jeecg.common.system.query: debug
 #swagger
 knife4j:
   #开启增强配置
@@ -393,20 +395,20 @@ justauth:
     GITHUB:
       client-id: ??
       client-secret: ??
-      redirect-uri: http://sso.test.com:8080/jeecg-boot/sys/thirdLogin/github/callback
+      redirect-uri: ${jeecg.domainUrl.api}/sys/thirdLogin/github/callback
     WECHAT_ENTERPRISE:
       client-id: ??
       client-secret: ??
-      redirect-uri: http://sso.test.com:8080/jeecg-boot/sys/thirdLogin/wechat_enterprise/callback
+      redirect-uri: ${jeecg.domainUrl.api}/sys/thirdLogin/wechat_enterprise/callback
       agent-id: ??
     DINGTALK:
-      client-id: ??
-      client-secret: ??
-      redirect-uri: http://sso.test.com:8080/jeecg-boot/sys/thirdLogin/dingtalk/callback
+      client-id: dingvn5rkhpgwpflpibk
+      client-secret: pU0T8V3wffxc7CsBJBhZOgPtGL7ObD8xHzmlPjTGD0Nqu3Yd97Km8phYEsp9Gb6c
+      redirect-uri: ${jeecg.domainUrl.api}/sys/thirdLogin/dingtalk/callback
     WECHAT_OPEN:
       client-id: ??
       client-secret: ??
-      redirect-uri: http://sso.test.com:8080/jeecg-boot/sys/thirdLogin/wechat_open/callback
+      redirect-uri: ${jeecg.domainUrl.api}/sys/thirdLogin/wechat_open/callback
   cache:
     type: default
     prefix: 'demo::'
