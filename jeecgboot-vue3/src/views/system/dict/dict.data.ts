@@ -150,7 +150,7 @@ export const itemFormSchema: FormSchema[] = [
             if (!value) {
               return Promise.reject('请输入数据值');
             }
-            if (new RegExp("[`~!@#$^&*()=|{}'.<>《》/?！￥（）—【】‘；：”“。，、？]").test(value)) {
+            if (new RegExp("[`~!@#$^&*()=|{}'<>《》/?！￥（）—【】‘；：”“。，、？]").test(value)) {
               return Promise.reject('数据值不能包含特殊字符！');
             }
             return new Promise<void>((resolve, reject) => {
