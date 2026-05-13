@@ -409,6 +409,10 @@ justauth:
       client-id: ??
       client-secret: ??
       redirect-uri: ${jeecg.domainUrl.api}/sys/thirdLogin/wechat_open/callback
+    FEISHU:
+      client-id: cli_aa8ea538bab81cd5
+      client-secret: dimTQEVB55aunb4iEVSUhdabkqJEDal5
+      redirect-uri: ${jeecg.domainUrl.api}/sys/thirdLogin/feishu/callback
   cache:
     type: default
     prefix: 'demo::'

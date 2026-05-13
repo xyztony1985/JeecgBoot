@@ -47,6 +47,7 @@ export function useThirdLogin() {
     thirdLoginInfo.value = {};
     thirdLoginState.value = false;
     let receiveMessage = function (event) {
+      console.log(`第三方登录回调：data=${event.data}, type=${typeof event.data}`);
       let token = event.data;
       if (typeof token === 'string') {
         //如果是字符串类型 说明是token信息
@@ -56,6 +57,8 @@ export function useThirdLogin() {
           bindingPhoneModal.value = true;
           let strings = token.split(',');
           thirdUserUuid.value = strings[1];
+        } else if (token.includes('[tea-sdk]ready')) {
+          // 飞书登录，会先返回这个 data，这里不做处理
         } else {
           doThirdLogin(token);
         }

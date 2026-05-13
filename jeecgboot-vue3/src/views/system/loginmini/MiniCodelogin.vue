@@ -51,6 +51,13 @@
                 <a href="" title="微信" @click="onThirdLogin('wechat_open')"><WechatFilled /></a>
               </div>
             </div>
+            <div class="aui-flex-box">
+              <div class="aui-third-login">
+                <a href="" title="飞书" @click="onThirdLogin('feishu')">
+                  <img src="@/assets/images/login/feishu-icon.png" />
+                </a>
+              </div>
+            </div>
           </div>
         </div>
       </div>
