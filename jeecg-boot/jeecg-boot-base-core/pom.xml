@@ -339,7 +339,7 @@
 		</dependency>
 		<!-- 第三方登录  -->
 		<dependency>
-			<groupId>com.xkcoding.justauth</groupId>
+			<groupId>com.github.wugenshui</groupId>
 			<artifactId>justauth-spring-boot-starter</artifactId>
 			<exclusions>
 				<exclusion>

@@ -142,7 +142,7 @@
                   </div>
                   <div class="aui-flex-box">
                     <div class="aui-third-login">
-                      <a title="钉钉" @click="onThirdLogin('dingtalk')"><DingtalkCircleFilled /></a>
+                      <a title="钉钉" @click="onThirdLogin('dingtalk_v2')"><DingtalkCircleFilled /></a>
                     </div>
                   </div>
                   <div class="aui-flex-box">
