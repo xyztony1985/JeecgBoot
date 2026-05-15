@@ -92,13 +92,6 @@ public class JwtFilter extends BasicHttpAuthenticationFilter {
     protected boolean preHandle(ServletRequest request, ServletResponse response) throws Exception {
         HttpServletRequest httpServletRequest = (HttpServletRequest) request;
         HttpServletResponse httpServletResponse = (HttpServletResponse) response;
-        
-        // 记录请求URL信息（便于调试和追踪）
-        String method = httpServletRequest.getMethod();
-        String uri = httpServletRequest.getRequestURI();
-        String queryString = httpServletRequest.getQueryString();
-        log.info(">>> 请求: {} {}{}", method, uri, queryString != null ? "?" + queryString : "");
-        
         if(allowOrigin){
             httpServletResponse.setHeader(HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN, httpServletRequest.getHeader(HttpHeaders.ORIGIN));
             // 允许客户端请求方法
