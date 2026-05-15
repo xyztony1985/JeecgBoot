@@ -20,6 +20,7 @@ import org.jeecg.common.util.SpringContextUtils;
 import org.jeecg.common.util.oConvertUtils;
 import org.jeecg.modules.base.service.BaseCommonService;
 import org.springframework.beans.BeansException;
+import org.springframework.core.annotation.Order;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.data.redis.connection.PoolException;
@@ -47,6 +48,7 @@ import java.util.stream.Collectors;
  */
 @RestControllerAdvice
 @Slf4j
+@Order(-1) // 设置最高优先级，确保优先于其他异常处理器（如积木报表）
 public class JeecgBootExceptionHandler {
 
 	@Resource
