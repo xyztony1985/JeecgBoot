@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
@@ -7,22 +7,30 @@
     <title>第三方登录</title>
 </head>
 <body>
-登陆中...
-<script>
-    window.onload = function () {
-        setTimeout(function (){
-            var thirdLoginInfo = "${token!''}";
-            if(!thirdLoginInfo){
+<#if failMsg??>
+    <p>登录失败：${failMsg}</p>
+<#else>
+    <p>登录中...</p>
+    <p id="js-error"></p>
+    <script>
+        <#noparse>
+        window.addEventListener('error', e => {
+            document.querySelector('#js-error').innerText = `js error:\n${e.error.stack}`;
+        });
+        </#noparse>
+
+        window.onload = function () {
+            setTimeout(function (){
                 var thirdLoginModel = '${thirdLoginModel!""}';
                 if(thirdLoginModel){
                     thirdLoginInfo = JSON.parse(thirdLoginModel);
                     thirdLoginInfo['isObj'] = true
                 }
-            }
-            window.opener.postMessage(thirdLoginInfo, "*");
-            window.close();
-        },1000)
-    }
-</script>
+                window.opener.postMessage(thirdLoginInfo, "*");
+                window.close();
+            },1000)
+        }
+    </script>
+</#if>
 </body>
 </html>

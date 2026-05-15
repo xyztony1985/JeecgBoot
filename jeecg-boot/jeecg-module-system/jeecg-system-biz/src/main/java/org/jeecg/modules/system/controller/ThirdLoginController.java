@@ -8,7 +8,6 @@ import com.xkcoding.justauth.AuthRequestFactory;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.extern.slf4j.Slf4j;
 import me.zhyd.oauth.model.AuthCallback;
-import me.zhyd.oauth.model.AuthResponse;
 import me.zhyd.oauth.request.AuthRequest;
 import me.zhyd.oauth.utils.AuthStateUtils;
 import me.zhyd.oauth.utils.StringUtils;
@@ -91,9 +90,8 @@ public class ThirdLoginController {
     public String loginThird(@PathVariable("source") String source, AuthCallback callback,ModelMap modelMap) {
 		log.info("第三方登录进入callback：" + source + " params：" + JSONObject.toJSONString(callback));
         AuthRequest authRequest = factory.get(source);
-        AuthResponse response = authRequest.login(callback);
+        var response = authRequest.login(callback);
         log.info(JSONObject.toJSONString(response));
-        Result<JSONObject> result = new Result<JSONObject>();
         if(response.getCode()==2000) {
 
         	JSONObject data = JSONObject.parseObject(JSONObject.toJSONString(response.getData()));
@@ -130,9 +128,8 @@ public class ThirdLoginController {
 			}
         }else{
 			modelMap.addAttribute("token", "登录失败");
+			modelMap.addAttribute("failMsg", JSONObject.toJSONString(response));
 		}
-        result.setSuccess(false);
-        result.setMessage("第三方登录异常,请联系管理员");
         return "thirdLogin";
     }
 
