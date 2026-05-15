@@ -21,6 +21,7 @@
 
         window.onload = function () {
             setTimeout(function (){
+                var thirdLoginInfo = '';
                 var thirdLoginModel = '${thirdLoginModel!""}';
                 if(thirdLoginModel){
                     thirdLoginInfo = JSON.parse(thirdLoginModel);
