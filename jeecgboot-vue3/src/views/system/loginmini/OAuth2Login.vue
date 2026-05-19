@@ -1,10 +1,11 @@
 <template>
-  <div> </div>
+  <p>检测当前 OAuth2 环境为：{{ env.name }}</p>
+  <p>{{ info }}</p>
 </template>
 
 <script setup lang="ts">
   import { ref } from 'vue';
-  import { isOAuth2AppEnv, sysOAuth2Callback, sysOAuth2Login } from '/@/views/sys/login/useLogin';
+  import { getOAuth2Env, sysOAuth2Callback, sysOAuth2Login } from '/@/views/sys/login/useLogin';
   import { useRouter } from 'vue-router';
   import { PageEnum } from '/@/enums/pageEnum';
   import { router } from '/@/router';
@@ -16,51 +17,37 @@
   import { defHttp } from '/@/utils/http/axios';
   import { OAUTH2_THIRD_LOGIN_TENANT_ID } from "/@/enums/cacheEnum";
 
-  const isOAuth = ref<boolean>(isOAuth2AppEnv());
-  const env = ref<any>({ thirdApp: false, wxWork: false, dingtalk: false });
+  let info = ref("");
+  const env = getOAuth2Env();
   const { currentRoute } = useRouter();
   const route = currentRoute.value;
-  if (!isOAuth2AppEnv()) {
+  if (env.isOAuth2) {
+    doOAuth2Login();
+  }
+  else {
     router.replace({ path: PageEnum.BASE_LOGIN, query: route.query });
   }
 
-  if (isOAuth.value) {
-    checkEnv();
-  }
-
-  /**
-   * 检测当前的环境
-   */
-  function checkEnv() {
-    // 判断当时是否是企业微信环境
-    if (/wxwork/i.test(navigator.userAgent)) {
-      env.value.thirdApp = true;
-      env.value.wxWork = true;
-    }
-    // 判断当时是否是钉钉环境
-    if (/dingtalk/i.test(navigator.userAgent)) {
-      env.value.thirdApp = true;
-      env.value.dingtalk = true;
-    }
-    doOAuth2Login();
-  }
 
   /**
    * 进行OAuth2登录操作
    */
   function doOAuth2Login() {
-    if (env.value.thirdApp) {
-      // 判断是否携带了Token，是就说明登录成功
-      if (route.query.oauth2LoginToken) {
-        let token = route.query.oauth2LoginToken;
-        //执行登录操作
-        thirdLogin({ token, thirdType: route.query.thirdType,tenantId: getTenantId });
-      } else if (env.value.wxWork) {
-        sysOAuth2Login('wechat_enterprise');
-      } else if (env.value.dingtalk) {
-        //新版钉钉登录
-        dingdingLogin();
-      }
+    console.log(route.query);
+    // 判断是否携带了Token，是就说明登录成功
+    if (route.query.oauth2LoginToken) {
+      let token = route.query.oauth2LoginToken;
+      //执行登录操作
+      thirdLogin({ token, thirdType: route.query.thirdType,tenantId: getTenantId });
+    } else if (env.wxwork) {
+      sysOAuth2Login('wechat_enterprise');
+    } else if (env.dingtalk) {
+      //新版钉钉登录
+      dingdingLogin();
+    } else if (env.feishu) {
+      sysOAuth2Login('feishu');
+    } else {
+      info.value = "当前环境未适配！";
     }
   }
 

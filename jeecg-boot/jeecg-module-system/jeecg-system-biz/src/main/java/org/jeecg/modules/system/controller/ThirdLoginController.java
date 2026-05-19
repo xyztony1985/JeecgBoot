@@ -371,8 +371,10 @@ public class ThirdLoginController {
             // 代码逻辑说明: [issues/I5BOUF]oauth2 钉钉无法登录------------
             builder.append("&prompt=").append("consent");
             url = builder.toString();
+		} else if (source.equalsIgnoreCase("feishu")){
+			url = factory.get(source).authorize(AuthStateUtils.createState());
 		} else {
-			return "不支持的source";
+			return "不支持的source：" + source;
 		}
 		log.info("oauth2 login url:" + url);
 		response.sendRedirect(url);

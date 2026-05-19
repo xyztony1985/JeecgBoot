@@ -170,7 +170,7 @@ async function checkPhone(rule, value, callback) {
  * 判断是否是OAuth2APP环境
  */
 export function isOAuth2AppEnv() {
-  return /wxwork|dingtalk/i.test(navigator.userAgent);
+  return getOAuth2Env().isOAuth2;
 }
 
 /**
@@ -178,6 +178,34 @@ export function isOAuth2AppEnv() {
  */
 export function isOAuth2DingAppEnv() {
   return /dingtalk/i.test(navigator.userAgent);
+}
+
+/**
+ * 获取当前OAuth2环境信息
+ */
+export function getOAuth2Env(): { 
+  isOAuth2: boolean; 
+  name: string;
+  dingtalk: boolean; 
+  wxwork: boolean; 
+  feishu: boolean; 
+} {
+  const ua = navigator.userAgent;
+  
+  const isDingtalk = /dingtalk/i.test(ua);
+  const isWxwork = /wxwork/i.test(ua);
+  const isFeishu = /lark/i.test(ua);
+  
+  return {
+    isOAuth2: isDingtalk || isWxwork || isFeishu,
+    name: isDingtalk ? 'dingtalk'
+          : isWxwork ? 'wxwork'
+          : isFeishu ? 'feishu'
+          : '',
+    dingtalk: isDingtalk,
+    wxwork: isWxwork,
+    feishu: isFeishu
+  };
 }
 
 /**

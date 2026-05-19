@@ -41,13 +41,13 @@ export function useThirdLogin() {
     const openWin = window.open(
       url,
       `login ${source}`,
-      'height=500, width=500, top=0, left=0, toolbar=no, menubar=no, scrollbars=no, resizable=no,location=n o, status=no'
+      'height=600, width=500, top=0, left=0, toolbar=no, menubar=no, scrollbars=no, resizable=no,location=n o, status=no'
     );
     thirdType.value = source;
     thirdLoginInfo.value = {};
     thirdLoginState.value = false;
     let receiveMessage = function (event) {
-      console.log(`第三方登录回调：data=${event.data}, type=${typeof event.data}`);
+      console.log(`第三方登录回调：token=${event.data}, type=${typeof event.data}`);
       let token = event.data;
       if (typeof token === 'string') {
         //如果是字符串类型 说明是token信息
@@ -59,6 +59,8 @@ export function useThirdLogin() {
           thirdUserUuid.value = strings[1];
         } else if (token.includes('[tea-sdk]ready')) {
           // 飞书登录，会先返回这个 data，这里不做处理
+        } else if (token.trim() === ''){
+          createMessage.warning('登录失败：第三方回调 token 为空，请检查');
         } else {
           doThirdLogin(token);
         }

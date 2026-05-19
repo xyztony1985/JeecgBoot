@@ -161,7 +161,7 @@ export const passwordChange = (params) => defHttp.get({ url: Api.passwordChange,
 export function thirdLogin(params, mode: ErrorMessageMode = 'modal') {
   //==========begin 第三方登录/auth2登录需要传递租户id===========
   let tenantId = "0";
-  if(!params.tenantId){
+  if(params.tenantId){
     tenantId = params.tenantId;
   }
   //==========end 第三方登录/auth2登录需要传递租户id===========
