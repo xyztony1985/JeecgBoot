@@ -39,6 +39,7 @@
         <dependency>
             <groupId>org.jeecgframework.boot3</groupId>
             <artifactId>jeecg-boot-module-airag</artifactId>
+            <version>${jeecgboot.version}</version>
         </dependency>
 
         <!-- ==================== 微服务 ==================== -->
@@ -49,12 +50,6 @@
         <dependency>
             <groupId>org.jeecgframework.boot3</groupId>
             <artifactId>jeecg-boot-starter-job</artifactId>
-        </dependency>
-
-        <!-- ==================== 工具类 ==================== -->
-        <dependency>
-            <groupId>cn.hutool</groupId>
-            <artifactId>hutool-all</artifactId>
         </dependency>
 
         <!-- ==================== 第三方集成 ==================== -->

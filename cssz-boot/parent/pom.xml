@@ -24,21 +24,14 @@
         <cssz.version>2.0.0</cssz.version>
     </properties>
 
-    <!-- 依赖管理 -->
+    <!-- 依赖管理 - 仅管理 jeecg-boot-parent 未包含的依赖 -->
     <dependencyManagement>
         <dependencies>
-            <!-- CSSZ Base 基础库 -->
+            <!-- CSSZ Base 基础库：包含了 jeecg-boot-base-core -->
             <dependency>
                 <groupId>com.cssz.boot</groupId>
                 <artifactId>base</artifactId>
                 <version>${cssz.version}</version>
-            </dependency>
-
-            <!-- JeecgBoot Base Core -->
-            <dependency>
-                <groupId>org.jeecgframework.boot3</groupId>
-                <artifactId>jeecg-boot-base-core</artifactId>
-                <version>${jeecgboot.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
