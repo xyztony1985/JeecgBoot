@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <!-- 继承 jeecg-boot-parent -->
+    <parent>
+        <groupId>org.jeecgframework.boot3</groupId>
+        <artifactId>jeecg-boot-parent</artifactId>
+        <version>3.9.1</version>
+    </parent>
+
+    <groupId>com.cssz.boot</groupId>
+    <artifactId>parent</artifactId>
+    <version>2.0.0</version>
+    <packaging>pom</packaging>
+
+    <name>CSSZ Parent</name>
+    <description>CSSZ Parent - A foundation library project based on JeecgBoot for other projects to inherit and extend</description>
+
+    <!-- 自定义属性 -->
+    <properties>
+        <cssz.version>2.0.0</cssz.version>
+    </properties>
+
+    <!-- 依赖管理 -->
+    <dependencyManagement>
+        <dependencies>
+            <!-- CSSZ Base 基础库 -->
+            <dependency>
+                <groupId>com.cssz.boot</groupId>
+                <artifactId>base</artifactId>
+                <version>${cssz.version}</version>
+            </dependency>
+
+            <!-- JeecgBoot Base Core -->
+            <dependency>
+                <groupId>org.jeecgframework.boot3</groupId>
+                <artifactId>jeecg-boot-base-core</artifactId>
+                <version>${jeecgboot.version}</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
+    <!-- 子模块（未来扩展） -->
+    <!--
+    <modules>
+        <module>../cssz-base</module>
+    </modules>
+    -->
+
+    <!-- 构建配置 -->
+    <build>
+        <plugins>
+            <!-- Maven 编译插件 -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <source>17</source>
+                    <target>17</target>
+                    <encoding>UTF-8</encoding>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
+    <!-- 仓库配置 -->
+    <repositories>
+        <repository>
+            <id>aliyun</id>
+            <name>Aliyun Maven Repository</name>
+            <url>https://maven.aliyun.com/repository/public</url>
+            <releases>
+                <enabled>true</enabled>
+            </releases>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+        </repository>
+    </repositories>
+
+    <pluginRepositories>
+        <pluginRepository>
+            <id>aliyun-plugin</id>
+            <name>Aliyun Maven Plugin Repository</name>
+            <url>https://maven.aliyun.com/repository/public</url>
+            <releases>
+                <enabled>true</enabled>
+            </releases>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+        </pluginRepository>
+    </pluginRepositories>
+</project>
