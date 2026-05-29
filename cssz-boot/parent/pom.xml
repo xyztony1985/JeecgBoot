@@ -17,7 +17,7 @@
     <packaging>pom</packaging>
 
     <name>CSSZ Parent</name>
-    <description>CSSZ Parent - A foundation library project based on JeecgBoot for other projects to inherit and extend</description>
+    <description>CSSZ Parent - A foundation library project based on JeecgBoot</description>
 
     <!-- 自定义属性 -->
     <properties>
@@ -42,56 +42,4 @@
             </dependency>
         </dependencies>
     </dependencyManagement>
-
-    <!-- 子模块（未来扩展） -->
-    <!--
-    <modules>
-        <module>../cssz-base</module>
-    </modules>
-    -->
-
-    <!-- 构建配置 -->
-    <build>
-        <plugins>
-            <!-- Maven 编译插件 -->
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <configuration>
-                    <source>17</source>
-                    <target>17</target>
-                    <encoding>UTF-8</encoding>
-                </configuration>
-            </plugin>
-        </plugins>
-    </build>
-
-    <!-- 仓库配置 -->
-    <repositories>
-        <repository>
-            <id>aliyun</id>
-            <name>Aliyun Maven Repository</name>
-            <url>https://maven.aliyun.com/repository/public</url>
-            <releases>
-                <enabled>true</enabled>
-            </releases>
-            <snapshots>
-                <enabled>false</enabled>
-            </snapshots>
-        </repository>
-    </repositories>
-
-    <pluginRepositories>
-        <pluginRepository>
-            <id>aliyun-plugin</id>
-            <name>Aliyun Maven Plugin Repository</name>
-            <url>https://maven.aliyun.com/repository/public</url>
-            <releases>
-                <enabled>true</enabled>
-            </releases>
-            <snapshots>
-                <enabled>false</enabled>
-            </snapshots>
-        </pluginRepository>
-    </pluginRepositories>
 </project>

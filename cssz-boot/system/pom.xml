@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <groupId>com.cssz.boot</groupId>
+        <artifactId>parent</artifactId>
+        <version>2.0.0</version>
+        <relativePath>../parent/pom.xml</relativePath>
+    </parent>
+    <modelVersion>4.0.0</modelVersion>
+    <artifactId>system</artifactId>
+    <packaging>jar</packaging>
+
+    <name>CSSZ System</name>
+    <description>CSSZ System - 独立的系统管理模块</description>
+
+    <dependencies>
+        <!-- ==================== CSSZ Base (包含 jeecg-boot-base-core 及常用依赖) ==================== -->
+        <dependency>
+            <groupId>com.cssz.boot</groupId>
+            <artifactId>base</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.hibernate</groupId>
+            <artifactId>hibernate-core</artifactId>
+        </dependency>
+
+        <!-- ==================== JeecgBoot 系统模块 ==================== -->
+        <dependency>
+            <groupId>org.jeecgframework.boot3</groupId>
+            <artifactId>jeecg-system-local-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.jeecgframework.boot3</groupId>
+            <artifactId>jeecg-online</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.jeecgframework.boot3</groupId>
+            <artifactId>jeecg-boot-module-airag</artifactId>
+        </dependency>
+
+        <!-- ==================== 微服务 ==================== -->
+        <dependency>
+            <groupId>org.jeecgframework.boot3</groupId>
+            <artifactId>jeecg-boot-starter-cloud</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.jeecgframework.boot3</groupId>
+            <artifactId>jeecg-boot-starter-job</artifactId>
+        </dependency>
+
+        <!-- ==================== 工具类 ==================== -->
+        <dependency>
+            <groupId>cn.hutool</groupId>
+            <artifactId>hutool-all</artifactId>
+        </dependency>
+
+        <!-- ==================== 第三方集成 ==================== -->
+        <dependency>
+            <groupId>org.jeecgframework</groupId>
+            <artifactId>weixin4j</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.jeecgframework.jimureport</groupId>
+            <artifactId>jimureport-spring-boot3-starter</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.jeecgframework.jimureport</groupId>
+            <artifactId>jimubi-spring-boot3-starter</artifactId>
+        </dependency>
+
+        <!-- ==================== 其他 ==================== -->
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <scope>provided</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+            </plugin>
+        </plugins>
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+                <filtering>true</filtering>
+            </resource>
+            <resource>
+                <directory>src/main/java</directory>
+                <includes>
+                    <include>**/*.xml</include>
+                    <include>**/*.json</include>
+                    <include>**/*.ftl</include>
+                </includes>
+            </resource>
+        </resources>
+    </build>
+</project>
