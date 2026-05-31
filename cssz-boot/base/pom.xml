@@ -13,7 +13,6 @@
     </parent>
 
     <artifactId>cssz-boot-base</artifactId>
-    <packaging>jar</packaging>
 
     <name>CSSZ Base</name>
     <description>CSSZ Base Library - A foundation package based on JeecgBoot Base Core for other projects to import</description>
