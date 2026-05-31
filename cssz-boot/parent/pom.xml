@@ -12,7 +12,7 @@
     </parent>
 
     <groupId>com.cssz.boot</groupId>
-    <artifactId>parent</artifactId>
+    <artifactId>cssz-boot-parent</artifactId>
     <version>2.0.0</version>
     <packaging>pom</packaging>
 
@@ -30,7 +30,7 @@
             <!-- CSSZ Base 基础库：包含了 jeecg-boot-base-core -->
             <dependency>
                 <groupId>com.cssz.boot</groupId>
-                <artifactId>base</artifactId>
+                <artifactId>cssz-boot-base</artifactId>
                 <version>${cssz.version}</version>
             </dependency>
         </dependencies>
