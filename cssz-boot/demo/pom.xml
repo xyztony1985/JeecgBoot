@@ -41,10 +41,7 @@
         </dependency>
 
         <!-- ==================== 第三方集成 ==================== -->
-        <dependency>
-            <groupId>org.jeecgframework</groupId>
-            <artifactId>weixin4j</artifactId>
-        </dependency>
+
 
         <!-- ==================== 其他 ==================== -->
         <dependency>
