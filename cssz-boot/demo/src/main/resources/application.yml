@@ -1,0 +1,13 @@
+server:
+  port: 7001
+  servlet:
+    context-path: /jeecg-boot
+
+spring:
+  application:
+    name: app1
+  main:
+    allow-bean-definition-overriding: true
+  profiles:
+    active: dev
+ 

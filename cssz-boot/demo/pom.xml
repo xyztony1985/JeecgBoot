@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>com.cssz.boot</groupId>
+        <artifactId>cssz-boot-parent</artifactId>
+        <version>2.0.0</version>
+        <relativePath>../parent/pom.xml</relativePath>
+    </parent>
+
+    <artifactId>cssz-boot-demo</artifactId>
+
+    <name>CSSZ Demo</name>
+    <description>CSSZ Demo - 子应用示例</description>
+
+    <dependencies>
+        <!-- ==================== CSSZ Base (包含 jeecg-boot-base-core 及常用依赖) ==================== -->
+        <dependency>
+            <groupId>com.cssz.boot</groupId>
+            <artifactId>cssz-boot-base</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.hibernate</groupId>
+            <artifactId>hibernate-core</artifactId>
+        </dependency>
+
+        <!-- ==================== JeecgBoot 系统模块 ==================== -->
+        <dependency>
+            <groupId>org.jeecgframework.boot3</groupId>
+            <artifactId>jeecg-system-local-api</artifactId>
+        </dependency>
+
+        <!-- ==================== 微服务 ==================== -->
+        <dependency>
+            <groupId>org.jeecgframework.boot3</groupId>
+            <artifactId>jeecg-boot-starter-cloud</artifactId>
+        </dependency>
+
+        <!-- ==================== 第三方集成 ==================== -->
+        <dependency>
+            <groupId>org.jeecgframework</groupId>
+            <artifactId>weixin4j</artifactId>
+        </dependency>
+
+        <!-- ==================== 其他 ==================== -->
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <scope>provided</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+            </plugin>
+        </plugins>
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+                <filtering>true</filtering>
+            </resource>
+            <resource>
+                <directory>src/main/java</directory>
+                <includes>
+                    <include>**/*.xml</include>
+                    <include>**/*.json</include>
+                    <include>**/*.ftl</include>
+                </includes>
+            </resource>
+        </resources>
+    </build>
+</project>

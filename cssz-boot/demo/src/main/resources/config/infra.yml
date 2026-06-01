@@ -1,0 +1,25 @@
+# ============================================
+# 基础设施配置
+# 仅包含最核心的连接信息
+# ============================================
+
+infra:
+  mysql:
+    host: ${MYSQL_HOST:127.0.0.1}
+    port: ${MYSQL_PORT:3306}
+    username: ${MYSQL_USER:root}
+    password: ${MYSQL_PASSWORD:root}
+    database-system: ${MYSQL_DB_SYSTEM:jeecg-boot}
+    database-app1: ${MYSQL_DB_APP1:jeecg-app1}
+
+  redis:
+    host: ${REDIS_HOST:127.0.0.1}
+    port: ${REDIS_PORT:6379}
+    password: ${REDIS_PASSWORD}
+    database: ${REDIS_DB:0}
+
+  rabbitmq:
+    host: ${RABBITMQ_HOST:jeecg-boot-rabbitmq}
+    port: ${RABBITMQ_PORT:5672}
+    username: ${RABBITMQ_USER:guest}
+    password: ${RABBITMQ_PASSWORD:guest}
