@@ -27,20 +27,6 @@
 
     <build>
         <plugins>
-            <!-- Maven Source Plugin (生成源码包) -->
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-source-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>attach-sources</id>
-                        <goals>
-                            <goal>jar-no-fork</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-
             <!-- Maven Javadoc Plugin (生成文档包) -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
