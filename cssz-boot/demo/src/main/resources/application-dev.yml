@@ -20,5 +20,5 @@ spring:
       # - nacos:infra.yml
       # - nacos:jeecg.yml
       # - optional:nacos:biz-main-app.yml
-      - optional:classpath:config/infra.yml
-      - optional:classpath:config/jeecg.yml
+      - classpath:config/infra.yml
+      - classpath:config/jeecg.yml
