@@ -34,15 +34,6 @@
             <artifactId>jeecg-boot-starter-cloud</artifactId>
         </dependency>
 
-        <!-- ==================== 第三方集成 ==================== -->
-
-
-        <!-- ==================== 其他 ==================== -->
-        <dependency>
-            <groupId>org.projectlombok</groupId>
-            <artifactId>lombok</artifactId>
-            <scope>provided</scope>
-        </dependency>
     </dependencies>
 
     <build>

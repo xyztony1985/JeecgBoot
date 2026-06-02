@@ -67,12 +67,6 @@
             <artifactId>jimubi-spring-boot3-starter</artifactId>
         </dependency>
 
-        <!-- ==================== 其他 ==================== -->
-        <dependency>
-            <groupId>org.projectlombok</groupId>
-            <artifactId>lombok</artifactId>
-            <scope>provided</scope>
-        </dependency>
     </dependencies>
 
     <build>

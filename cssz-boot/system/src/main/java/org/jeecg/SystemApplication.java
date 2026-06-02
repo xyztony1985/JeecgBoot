@@ -33,17 +33,18 @@ import java.net.UnknownHostException;
  * @date: 2022/4/21 10:55
  */
 @Slf4j
-@SpringBootApplication
-@EnableFeignClients(basePackages = {"org.jeecg"})
+@SpringBootApplication(exclude = { MongoAutoConfiguration.class })
+@EnableFeignClients(basePackages = { "org.jeecg", "com.cssz" })
 @EnableScheduling
-@EnableAutoConfiguration(exclude={MongoAutoConfiguration.class})
 @ImportAutoConfiguration(JustAuthAutoConfiguration.class)  // spring boot 3.x justauth 兼容性处理
 public class SystemApplication extends SpringBootServletInitializer implements CommandLineRunner {
 
     @Autowired
     private RedisTemplate<String, Object> redisTemplate;
+
     @Override
     protected SpringApplicationBuilder configure(SpringApplicationBuilder application) {
+        // 用于支持打包为 war 文件时，部署到外部 tomcat 等容器
         return application.sources(SystemApplication.class);
     }
 
