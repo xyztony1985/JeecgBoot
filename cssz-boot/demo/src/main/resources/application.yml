@@ -6,8 +6,12 @@ server:
 spring:
   application:
     name: app1
-  main:
-    allow-bean-definition-overriding: true
   profiles:
     active: dev
- 
+
+# 子应用专注于业务实现，不需要的 jeecg 组件在下面统一排除或关闭
+  autoconfigure:
+    exclude:
+      - org.jeecgframework.minidao.auto.MinidaoAutoConfiguration
+  quartz:
+    auto-startup: false

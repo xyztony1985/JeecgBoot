@@ -1,6 +1,5 @@
 package org.jeecg;
 
-import com.xkcoding.justauth.autoconfigure.JustAuthAutoConfiguration;
 import lombok.extern.slf4j.Slf4j;
 import org.jeecg.common.base.BaseMap;
 import org.jeecg.common.constant.GlobalConstants;
@@ -8,35 +7,36 @@ import org.jeecg.common.util.oConvertUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
-import org.springframework.boot.autoconfigure.ImportAutoConfiguration;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.mongo.MongoAutoConfiguration;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.web.servlet.support.SpringBootServletInitializer;
 import org.springframework.cloud.openfeign.EnableFeignClients;
 import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.FilterType;
 import org.springframework.core.env.Environment;
 import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.scheduling.annotation.EnableScheduling;
-
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 
 /**
- * 微服务启动类（采用此类启动项目为微服务模式）
- * 特别提醒:
- * 1、需要先初始化Nacos的数据库脚本，db/tables_nacos.sql
- * 2.需要集成mogodb请删除 exclude={MongoAutoConfiguration.class}
- * 
- * @author jeecg
- * @date: 2022/4/21 10:55
+ * 微服务启动类
  */
 @Slf4j
-@SpringBootApplication(exclude = { MongoAutoConfiguration.class })
+@SpringBootApplication(exclude = { 
+    MongoAutoConfiguration.class,
+    org.jeecgframework.minidao.auto.MinidaoAutoConfiguration.class,
+    org.springframework.boot.autoconfigure.quartz.QuartzAutoConfiguration.class
+})
+@ComponentScan(excludeFilters = {
+    @ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, classes = {
+        org.jeecg.config.TaskSchedulerConfig.class
+    }),
+    @ComponentScan.Filter(type = FilterType.REGEX, pattern = "org\\.jeecg\\.modules\\.airag\\..*")
+})
 @EnableFeignClients(basePackages = { "org.jeecg", "com.cssz" })
-@EnableScheduling
-@ImportAutoConfiguration(JustAuthAutoConfiguration.class)  // spring boot 3.x justauth 兼容性处理
+// @EnableScheduling
 public class Application extends SpringBootServletInitializer implements CommandLineRunner {
 
     @Autowired
