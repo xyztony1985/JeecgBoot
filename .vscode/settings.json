@@ -1,0 +1,19 @@
+{
+    "java.configuration.updateBuildConfiguration": "interactive",
+    "workbench.colorTheme": "Light",
+    "maven.terminal.favorites": [
+        {
+            "command": "clean install -DskipTests",
+            "debug": false
+        },
+        {
+            "command": "clean package -DskipTests",
+            "debug": false
+        },
+        {
+            "command": "spring-boot:run",
+            "debug": true
+        }
+    ],
+    "java.compile.nullAnalysis.mode": "disabled",
+}

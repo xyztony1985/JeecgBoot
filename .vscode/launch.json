@@ -1,0 +1,49 @@
+{
+    // 使用 IntelliSense 了解相关属性。 
+    // 悬停以查看现有属性的描述。
+    // 欲了解更多信息，请访问: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "java",
+            "name": "Current File",
+            "request": "launch",
+            "mainClass": "${file}"
+        },
+        {
+            "type": "java",
+            "name": "DemoApplication",
+            "request": "launch",
+            "mainClass": "org.jeecg.CloudApplication",
+            "projectName": "cssz-boot-demo"
+        },
+        {
+            "type": "java",
+            "name": "SystemApplication",
+            "request": "launch",
+            "mainClass": "org.jeecg.SystemApplication",
+            "projectName": "cssz-boot-system"
+        },
+        {
+            "type": "java",
+            "name": "JeecgGatewayApplication",
+            "request": "launch",
+            "mainClass": "org.jeecg.JeecgGatewayApplication",
+            "projectName": "jeecg-cloud-gateway"
+        },
+        {
+            "type": "java",
+            "name": "JeecgSystemCloudApplication",
+            "request": "launch",
+            "mainClass": "org.jeecg.JeecgSystemCloudApplication",
+            "projectName": "jeecg-system-cloud-start"
+        },
+        {
+            "type": "java",
+            "name": "JeecgSystemApplication",
+            "request": "launch",
+            "mainClass": "org.jeecg.JeecgSystemApplication",
+            "projectName": "jeecg-system-start"
+        },
+    ]
+}
