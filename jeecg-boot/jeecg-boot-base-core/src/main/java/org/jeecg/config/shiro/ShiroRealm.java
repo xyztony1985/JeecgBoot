@@ -37,7 +37,7 @@ import java.util.Set;
  */
 @Component
 @Slf4j
-@Role(BeanDefinition.ROLE_INFRASTRUCTURE)
+@Role(BeanDefinition.ROLE_INFRASTRUCTURE)  // 标记为基础设施角色，优先初始化
 public class ShiroRealm extends AuthorizingRealm {
 	@Lazy
     @Resource
