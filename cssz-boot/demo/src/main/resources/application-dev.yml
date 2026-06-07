@@ -2,23 +2,20 @@ spring:
   cloud:
     nacos:
       config:
-        enabled: false
-        server-addr: @config.server-addr@
+        server-addr: 127.0.0.1:8848
+        namespace: cssz
         group: LOCAL_DEV
-        namespace: @config.namespace@
-        username: @config.username@
-        password: @config.password@
+        # username: nacos
+        # password: nacos
       discovery:
-        enabled: false
         server-addr: ${spring.cloud.nacos.config.server-addr}
-        group: auto_host_${COMPUTERNAME:${HOSTNAME:unknown}}
         namespace: ${spring.cloud.nacos.config.namespace}
-        username: @config.username@
-        password: @config.password@
+        group: auto_host_${COMPUTERNAME:${HOSTNAME:unknown}}
+        # username: ${spring.cloud.nacos.config.username}
+        # password: ${spring.cloud.nacos.config.password}
   config:
     import:
-      # - nacos:infra.yml
-      # - nacos:jeecg.yml
-      # - optional:nacos:biz-main-app.yml
       - classpath:config/infra.yml
       - classpath:config/jeecg.yml
+      - optional:nacos:infra.yml
+      - optional:nacos:jeecg.yml
