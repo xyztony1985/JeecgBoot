@@ -37,17 +37,17 @@ import java.net.UnknownHostException;
 })
 @EnableFeignClients(basePackages = { "org.jeecg", "com.cssz" })
 // @EnableScheduling
-public class Application extends SpringBootServletInitializer implements CommandLineRunner {
+public class CloudApplication extends SpringBootServletInitializer implements CommandLineRunner {
 
     @Autowired
     private RedisTemplate<String, Object> redisTemplate;
     @Override
     protected SpringApplicationBuilder configure(SpringApplicationBuilder application) {
-        return application.sources(Application.class);
+        return application.sources(CloudApplication.class);
     }
 
     public static void main(String[] args) throws UnknownHostException {
-        ConfigurableApplicationContext application = SpringApplication.run(Application.class, args);
+        ConfigurableApplicationContext application = SpringApplication.run(CloudApplication.class, args);
         Environment env = application.getEnvironment();
         String ip = InetAddress.getLocalHost().getHostAddress();
         String port = env.getProperty("server.port");
