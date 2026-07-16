@@ -1,0 +1,387 @@
+# ============================================
+# Jeecg 框架配置：最大限度和 jeecg 框架的 application-dev.yml 保持一致
+# 引用 infra.yml 中的基础设施配置
+# ============================================
+
+server:
+  undertow:
+    max-http-post-size: 100MB
+    worker-threads: 16
+    buffers:
+      websocket: 8192
+      io: 16384
+  error:
+    include-exception: true
+    include-stacktrace: ALWAYS
+    include-message: ALWAYS
+  compression:
+    enabled: true
+    min-response-size: 1024
+    mime-types: application/javascript,application/json,application/xml,text/html,text/xml,text/plain,text/css,image/*
+
+management:
+  health:
+    mail:
+      enabled: false
+  endpoints:
+    web:
+      exposure:
+        include: metrics,httpexchanges,jeecghttptrace
+    health:
+      sensitive: true
+  endpoint:
+    health:
+      show-details: ALWAYS
+
+spring:
+  # 数据源配置 - 引用 infra.mysql
+  datasource:
+    druid:
+      stat-view-servlet:
+        enabled: true
+        loginUsername: admin
+        loginPassword: 123456
+        allow:
+      web-stat-filter:
+        enabled: true
+    dynamic:
+      druid:
+        initial-size: 5
+        min-idle: 5
+        maxActive: 20
+        maxWait: 60000
+        timeBetweenEvictionRunsMillis: 60000
+        minEvictableIdleTimeMillis: 300000
+        validationQuery: SELECT 1 FROM DUAL
+        testWhileIdle: true
+        testOnBorrow: false
+        testOnReturn: false
+        poolPreparedStatements: true
+        maxPoolPreparedStatementPerConnectionSize: 20
+        filters: stat,wall,slf4j
+        wall:
+          selectWhereAlwayTrueCheck: false
+        stat:
+          merge-sql: true
+          slow-sql-millis: 5000
+      datasource:
+        master:
+          url: jdbc:mysql://${infra.mysql.host}:${infra.mysql.port}/${infra.mysql.database-system}?characterEncoding=UTF-8&useUnicode=true&useSSL=false&tinyInt1isBit=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Shanghai&rewriteBatchedStatements=true
+          username: ${infra.mysql.username}
+          password: ${infra.mysql.password}
+          driver-class-name: com.mysql.cj.jdbc.Driver
+
+  # Redis 配置 - 引用 infra.redis
+  data:
+    redis:
+      database: ${infra.redis.database}
+      host: ${infra.redis.host}
+      password: ${infra.redis.password}
+      port: ${infra.redis.port}
+
+  # RabbitMQ 配置 - 引用 infra.rabbitmq
+  rabbitmq:
+    host: ${infra.rabbitmq.host}
+    username: ${infra.rabbitmq.username}
+    password: ${infra.rabbitmq.password}
+    port: ${infra.rabbitmq.port}
+    publisher-confirms: true
+    publisher-returns: true
+    virtual-host: /
+    listener:
+      simple:
+        acknowledge-mode: manual
+        concurrency: 1
+        max-concurrency: 1
+        retry:
+          enabled: true
+  # Flyway 配置
+  flyway:
+    enabled: false
+    locations: classpath:flyway/sql/mysql
+    clean-disabled: true
+  servlet:
+    multipart:
+      max-file-size: 100MB
+      max-request-size: 100MB
+  mail:
+    host: smtp.163.com
+    port: 465
+    username: csgohaxi@163.com
+    password: TEnGGr3jKzVDDrzV
+    protocol: smtp
+    properties:
+      mail:
+        smtp:
+          auth: true
+          ssl:
+            enable: true
+  quartz:
+    job-store-type: jdbc
+    initialize-schema: embedded
+    auto-startup: false
+    startup-delay: 1s
+    overwrite-existing-jobs: true
+    properties:
+      org:
+        quartz:
+          scheduler:
+            instanceName: MyScheduler
+            instanceId: AUTO
+          jobStore:
+            class: org.springframework.scheduling.quartz.LocalDataSourceJobStore
+            driverDelegateClass: org.quartz.impl.jdbcjobstore.StdJDBCDelegate
+            tablePrefix: QRTZ_
+            isClustered: true
+            misfireThreshold: 12000
+            clusterCheckinInterval: 15000
+          threadPool:
+            class: org.quartz.simpl.SimpleThreadPool
+            threadCount: 10
+            threadPriority: 5
+            threadsInheritContextClassLoaderOfInitializingThread: true
+  jackson:
+    date-format: yyyy-MM-dd HH:mm:ss
+    time-zone: GMT+8
+  aop:
+    proxy-target-class: true
+  activiti:
+    check-process-definitions: false
+    async-executor-activate: false
+    job-executor-activate: false
+  jpa:
+    open-in-view: false
+  freemarker:
+    suffix: .ftl
+    content-type: text/html
+    charset: UTF-8
+    cache: false
+    prefer-file-system-access: false
+    template-loader-path:
+      - classpath:/templates
+  mvc:
+    static-path-pattern: /**
+    pathmatch:
+      matching-strategy: ant_path_matcher
+  resource:
+    static-locations: classpath:/static/,classpath:/public/
+  autoconfigure:
+    exclude:
+      - com.alibaba.druid.spring.boot3.autoconfigure.DruidDataSourceAutoConfigure
+      - org.springframework.boot.autoconfigure.flyway.FlywayAutoConfiguration
+
+mybatis-plus:
+  mapper-locations: classpath*:org/jeecg/**/xml/*Mapper.xml, classpath*:org/cssz/boot/**/xml/*Mapper.xml
+  global-config:
+    banner: false
+    db-config:
+      id-type: ASSIGN_ID
+      table-underline: true
+  configuration:
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+    call-setters-on-nulls: true
+
+# Minidao 配置
+minidao:
+  base-package: org.jeecg.modules.jmreport.*,org.jeecg.modules.drag.*
+
+# Jeecg 专属配置
+jeecg:
+  firewall:
+    dataSourceSafe: false
+    lowCodeMode: dev
+  signatureSecret: dd05f1c54d63749eda95f9fa6d49v442a
+  signUrls: /sys/dict/getDictItems/*,/sys/dict/loadDict/*,/sys/dict/loadDictOrderByValue/*,/sys/dict/loadDictItem/*,/sys/dict/loadTreeData,/sys/api/queryTableDictItemsByCode,/sys/api/queryFilterTableDictInfo,/sys/api/queryTableDictByKeys,/sys/api/translateDictFromTable,/sys/api/translateDictFromTableByKeys
+  #华为云:hwobs ，minio:minio  本地:local   阿里云：alioss
+  uploadType: minio
+  domainUrl:
+    pc: http://localhost:3100
+    app: http://localhost:8051
+  path:
+    upload: /opt/upFiles
+    webapp: /opt/webapp
+  shiro:
+    excludeUrls: /test/jeecgDemo/demo3,/test/jeecgDemo/redisDemo/**,/category/**,/visual/**,/map/**,/jmreport/bigscreen2/**,/subsidiary/**,/template/wps/weboffice/**
+
+  # OSS 配置
+  oss:
+    endpoint: oss-cn-beijing.aliyuncs.com
+    accessKey: ??
+    secretKey: ??
+    bucketName: jeecgdev
+    staticDomain: ??
+
+  # 华为云 OBS 配置
+  obs:
+    endpoint: obs.cn-north-4.myhuaweicloud.com
+    accessKey: YUNVU8GLVTABMQKGFJFE
+    secretKey: ArZ2aRV7qEKvW78whyJZi8rsCJebyKONMtypVTaR
+    bucketName: szcx-test-fkpt
+    staticDomain: szcx-test-fkpt
+
+  # 文件预览
+  file-view-domain: https://qr-test.csszgroup.com/kkfile/preview
+
+  # MinIO 配置
+  minio:
+    minio_url: https://qr-test.csszgroup.com
+    minio_name: minio
+    minio_pass: minio_AbnJKm
+    bucketName: cssz-jeecgboot
+
+  # 积木报表
+  jmreport:
+    customPrePath: chery
+    saasMode:
+    firewall:
+      dataSourceSafe: false
+      lowCodeMode: dev
+
+  # WPS 配置
+  wps:
+    domain: https://wwo.wps.cn/office/
+    appid: ??
+    appsecret: ??
+
+  # XXL-Job 配置
+  xxljob:
+    enabled: true
+    adminAddresses: http://jeecg-boot-xxljob:9080/xxl-job-admin
+    appname: ${spring.application.name}
+    accessToken: ''
+    logPath: logs/jeecg/job/jobhandler/
+    logRetentionDays: 30
+
+  # Redisson 配置 - 引用 infra.redis
+  redisson:
+    address: ${infra.redis.host}:${infra.redis.port}
+    password: ${infra.redis.password}
+    type: STANDALONE
+    enabled: true
+
+  # AI 配置
+  ai-chat:
+    enabled: false
+    apiKey: "？？？？"
+    apiHost: "https://api.openai.com"
+    timeout: 60
+
+  ai-rag:
+    embed-store:
+      host: 127.0.0.1
+      port: 5432
+      database: postgres
+      user: postgres
+      password: postgres
+      table: embeddings
+
+  # 文件白名单
+  whitelist:
+    image-types:
+      - jpg
+      - jpeg
+      - png
+      - gif
+      - bmp
+      - svg
+      - ico
+      - heic
+    text-types:
+      - txt
+      - doc
+      - docx
+      - pdf
+      - csv
+      - md
+      - wps
+    audio-video-types:
+      - mp4
+      - avi
+      - mov
+      - wmv
+      - mp3
+      - wav
+      - qt
+    spreadsheet-types:
+      - xls
+      - xlsx
+    archive-types:
+      - zip
+      - rar
+      - 7z
+      - tar
+    app-types:
+      - apk
+      - wgt
+    presentation-types:
+      - ppt
+      - pptx
+
+# swagger
+knife4j:
+  production: false
+  basic:
+    enable: false
+    username: jeecg
+    password: jeecg1314
+
+# 日志配置
+logging:
+  level:
+    org.jeecg.modules.system.mapper: info
+
+# CAS 配置
+cas:
+  prefixUrl: http://localhost:8888/cas
+
+# 第三方登录
+justauth:
+  enabled: true
+  type:
+    GITHUB:
+      client-id: ??
+      client-secret: ??
+      redirect-uri: http://sso.test.com:8080/jeecg-boot/thirdLogin/github/callback
+    WECHAT_ENTERPRISE:
+      client-id: ??
+      client-secret: ??
+      redirect-uri: http://sso.test.com:8080/jeecg-boot/thirdLogin/wechat_enterprise/callback
+      agent-id: ??
+    DINGTALK:
+      client-id: ??
+      client-secret: ??
+      redirect-uri: http://sso.test.com:8080/jeecg-boot/thirdLogin/dingtalk/callback
+  cache:
+    type: default
+    prefix: 'demo::'
+    timeout: 1h
+
+# 第三方应用
+third-app:
+  enabled: false
+  type:
+    WECHAT_ENTERPRISE:
+      enabled: false
+      client-id: ??
+      client-secret: ??
+      agent-id: ??
+    DINGTALK:
+      enabled: false
+      client-id: ??
+      client-secret: ??
+      agent-id: ??
+
+active: dev
+rule-wrapper:
+  queryRule: OR
+
+onlyoffice:
+  enabled: false
+  suffix: docx,xlsx
+            instanceId: AUTO
+          jobStore:
+            class: org.springframework.scheduling.quartz.LocalDataSourceJobStore
+            driverDelegateClass: org.quartz.impl.jdbcjobstore.StdJDBCDelegate
+            tablePrefix: QRTZ_
+            isClustered: true
+            misfireThreshold: 12000
