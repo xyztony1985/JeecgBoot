@@ -3,7 +3,7 @@
 	<!--定义日志文件的存储地址 -->
 	<property name="LOG_HOME" value="../logs" />
 
-	<timestamp key="startupTime" datePattern="HHmmss" />
+	<timestamp key="startupTime" datePattern="yyyyMMdd.HHmmss" />
 
 	<!--<property name="COLOR_PATTERN" value="%black(%contextName-) %red(%d{yyyy-MM-dd HH:mm:ss}) %green([%thread]) %highlight(%-5level) %boldMagenta( %replace(%caller{1}){'\t|Caller.{1}0|\r\n', ''})- %gray(%msg%xEx%n)" />-->
 	<!-- 控制台输出 -->
@@ -19,7 +19,7 @@
 	<appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
 		<rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
 			<!--日志文件输出的文件名 -->
-			<FileNamePattern>${LOG_HOME}/demo-%d{yyyyMMdd}-${startupTime}.%i.log</FileNamePattern>
+			<FileNamePattern>${LOG_HOME}/${startupTime}-%d{yyyyMMdd}.%i.log</FileNamePattern>
 			<!--日志文件保留天数 -->
 			<MaxHistory>30</MaxHistory>
 			<maxFileSize>10MB</maxFileSize>

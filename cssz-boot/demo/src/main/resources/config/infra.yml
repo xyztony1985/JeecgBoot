@@ -5,21 +5,21 @@
 
 infra:
   mysql:
-    host: ${MYSQL_HOST:127.0.0.1}
-    port: ${MYSQL_PORT:3306}
-    username: ${MYSQL_USER:root}
-    password: ${MYSQL_PASSWORD:root}
-    database-system: ${MYSQL_DB_SYSTEM:jeecg-boot}
-    database-app1: ${MYSQL_DB_APP1:jeecg-app1}
+    host: 127.0.0.1
+    port: 3306
+    username: root
+    password: root
+    database-system: jeecg-boot
+    database-app1: jeecg-app1
 
   redis:
-    host: ${REDIS_HOST:127.0.0.1}
-    port: ${REDIS_PORT:6379}
-    password: ${REDIS_PASSWORD}
-    database: ${REDIS_DB:0}
+    host: 127.0.0.1
+    port: 6379
+    password: ""
+    database: 0
 
   rabbitmq:
-    host: ${RABBITMQ_HOST:jeecg-boot-rabbitmq}
-    port: ${RABBITMQ_PORT:5672}
-    username: ${RABBITMQ_USER:guest}
-    password: ${RABBITMQ_PASSWORD:guest}
+    host: jeecg-boot-rabbitmq
+    port: 5672
+    username: guest
+    password: guest
