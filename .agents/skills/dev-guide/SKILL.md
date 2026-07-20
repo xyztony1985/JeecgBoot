@@ -1,6 +1,6 @@
 ---
 name: dev-guide
-description: "基于设计文档的开发流程：从设计文档到代码实现的完整规范。适用于已审查通过的设计文档（含 PRD），指导影响范围评估、代码实现、文档同步。"
+description: "当用户要求根据设计文档/PRD/需求进行开发时，必须调用此 skill。触发词：根据文档开发、开始开发、实现功能、按设计文档开发。"
 ---
 
 # 基于设计文档的开发流程
@@ -17,40 +17,42 @@ description: "基于设计文档的开发流程：从设计文档到代码实现
 
 ---
 
-## 一、执行流程
+## 执行流程
 
-### 阶段 1：读取设计文档与规范
+> 严格按阶段顺序执行，禁止跳步或合并阶段。每个阶段有明确的门禁条件，通过后才能进入下一阶段。
 
-**必须先读取**：
+### 阶段 1：读取设计文档与影响范围评估
+
+**目的**：充分理解需求与设计，输出完整的文件影响清单，供用户确认后再动手编码。
+
+**必须读取**：
 
 ```bash
 # 1. 设计文档（必须）
 Read: spec/{需求目录}/design.md
 Read: spec/{需求目录}/prd.md  # 如果存在
 
-# 2. 后端开发规范
-Read: ../../dev-guide/后端规范.md
+# 2. 开发规范（必须）
+Read: dev-guide/后端规范.md
+Read: dev-guide/数据库规范.md
 
-# 3. 数据库规范（如涉及数据库变更）
-Read: ../../dev-guide/数据库规范.md
+# 3. 其他相关规范（按需）：在 `dev-guide/index.md` 检索相关文档
 ```
 
-**设计文档应包含**：
-- 需求背景与目标
-- 架构设计（模块拆分、职责划分）
-- 接口设计（RESTful API、参数、响应结构）
-- 数据模型（表结构、字段、索引）
-- 异常处理与边界场景
-- 安全设计（鉴权、SQL 注入防护等）
+**读取后，向用户输出**：
+- 简要总结需求目标与核心功能点
+- 列出设计文档中的关键设计决策（模块划分、接口、数据模型等）
+- 标注设计文档中不清晰或可能影响实现的问题
+- 输出树状文件影响清单（格式见下方）
 
-### 阶段 2：影响范围评估
-
-**在开始编码前，输出树状文件影响清单，等待用户确认**：
+**树状清单格式**：
 
 ```
 功能名称
 │
 ├── 📗 新增文件（N 个）
+│   ├── 数据库（N 个）
+│   │   └── sql/V{date}_{seq}__{module}_{action}.sql
 │   ├── 后端（N 个）
 │   │   └── com/cssz/modules/{模块名}/
 │   │       ├── entity/XxxEntity.java
@@ -58,10 +60,8 @@ Read: ../../dev-guide/数据库规范.md
 │   │       ├── service/IXxxService.java
 │   │       ├── service/impl/XxxServiceImpl.java
 │   │       └── controller/XxxController.java
-│   ├── 前端（N 个）
-│   │   └── src/components/Xxx.vue
-│   └── 数据库（N 个）
-│       └── sql/V{date}_{seq}__{module}_{action}.sql
+│   └── 前端（N 个）
+│       └── src/components/Xxx.vue
 │
 ├── 📝 修改文件（N 个）
 │   ├── 后端（N 个）
@@ -80,6 +80,8 @@ Read: ../../dev-guide/数据库规范.md
 附件托管模式改造
 │
 ├── 📗 新增文件（7 个）
+│   ├── 数据库（1 个）
+│   │   └── sql/V20260720_0__attachment_create_sys_attachment.sql
 │   ├── 后端（5 个）
 │   │   └── com/cssz/modules/file/
 │   │       ├── entity/SysAttachment.java
@@ -87,10 +89,8 @@ Read: ../../dev-guide/数据库规范.md
 │   │       ├── service/ISysAttachmentService.java
 │   │       ├── service/impl/SysAttachmentServiceImpl.java
 │   │       └── controller/SysFileController.java
-│   ├── 前端（1 个）
-│   │   └── src/utils/common/fileHelper.ts
-│   └── 数据库（1 个）
-│       └── sql/V20260720_0__attachment_create_sys_attachment.sql
+│   └── 前端（1 个）
+│       └── src/utils/common/fileHelper.ts
 │
 ├── 📝 修改文件（3 个）
 │   └── 前端
@@ -105,70 +105,42 @@ Read: ../../dev-guide/数据库规范.md
     └── 无
 ```
 
-**用户确认后，方可进入编码阶段**。
+**门禁**：用户确认影响范围 → 进入阶段 2。
 
-### 阶段 3：代码实现
+### 阶段 2：代码实现
 
-按照 `后端规范.md` 和 `数据库规范.md` 中的规范实现代码，重点关注：
+> **必须按以下子步骤顺序执行，禁止并行或跳步。** 每步完成后向用户汇报进展，确认后再继续下一步。
 
-- 分层规范（Entity、Mapper、Service、Controller 的基类与注解）
-- 数据库脚本命名与表设计规范
-- 通用响应类、权限控制、文件存储等公共能力的使用
+#### 步骤 2.1：生成数据库脚本
 
-### 阶段 4：开发后收尾
+**依据**：`dev-guide/数据库规范.md`
+
+**门禁**：SQL 脚本已生成，符合命名与表设计规范 → 进入步骤 2.2。
+
+#### 步骤 2.2：编写后端代码
+
+**依据**：`dev-guide/后端规范.md`
+
+**门禁**：代码符合分层规范与注解要求 → 进入步骤 2.3。
+
+#### 步骤 2.3：编写前端代码
+
+**要求**：
+- 根据设计文档中的接口定义，调用后端 API
+- 遵循项目现有的前端代码风格与组件结构
+
+**门禁**：前后端接口对接完成，核心流程可走通 → 进入阶段 3。
+
+### 阶段 3：开发后收尾
 
 - [ ] 同步更新设计文档（如有变更）
 - [ ] 更新 `implementation-notes.md`，记录关键决策、权衡、未覆盖场景
-- [ ] 测试验证核心流程
 - [ ] 检查代码是否符合分层规范与注解要求
 
 ---
 
-## 二、开发检查清单
-
-### 开发前
-
-- [ ] 设计文档已审查通过（无 P0 阻塞问题）
-- [ ] 输出影响范围评估，用户已确认
-- [ ] SQL 脚本按命名规范创建
-- [ ] 确认后端文件放在 `com/cssz/modules/{模块名}` 下
-
-### 开发中
-
-- [ ] Entity 继承 `CsEntity`
-- [ ] Mapper 继承 `BaseMapper<Entity>`
-- [ ] Service 接口继承 `IService<Entity>`
-- [ ] Service 实现继承 `ServiceImpl<Mapper, Entity>`
-- [ ] Controller 使用 `@RestController` 和 `@RequestMapping`
-- [ ] Controller 使用 `@RequiresPermissions` 控制权限
-- [ ] Controller 使用 `Result<T>` 返回统一格式
-- [ ] 使用 `@Schema` 添加接口文档
-- [ ] 使用 `@Slf4j` 记录日志
-- [ ] 事务方法添加 `@Transactional`
-
-### 开发后
-
-- [ ] 设计文档与实现同步更新
-- [ ] `implementation-notes.md` 记录关键决策
-- [ ] 测试验证核心流程
-
----
-
-## 三、新模块开发检查清单
-
-创建新业务模块时，额外需要完成：
-
-- [ ] 在 `jeecg-system-biz/src/main/java/com/cssz/modules/` 下创建模块目录
-- [ ] 创建包结构：`com.cssz.modules.{模块名}`
-- [ ] 创建 Entity、Mapper、Service、Controller 层
-- [ ] 配置权限标识（`@RequiresPermissions`）
-- [ ] 添加必要的配置项到 `application.yml`
-- [ ] 执行数据库建表 SQL
-- [ ] 在系统权限管理中添加权限
-
----
-
-## 四、相关文档
+## 相关文档
 
 - [后端开发规范](../../dev-guide/后端规范.md)
 - [数据库规范](../../dev-guide/数据库规范.md)
+- [附件上传规范](../../dev-guide/attachment-guide.md)
