@@ -284,8 +284,8 @@ public class SsrfFileTypeFilter {
             throw new JeecgBootException("上传业务路径深度超出限制！");
         }
 
-        // 3. 限制字符集（只允许字母、数字、下划线、横线、斜杠）
-        if (!normalized.matches("^[a-zA-Z0-9/_-]+$")) {
+        // 3. 限制字符集（只允许字母、数字、下划线、横线、斜杠、点号）
+        if (!normalized.matches("^[a-zA-Z0-9/._-]+$")) {
             throw new JeecgBootException("上传业务路径包含非法字符！");
         }
     }

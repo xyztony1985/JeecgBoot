@@ -29,7 +29,7 @@
   import { ref, reactive, computed, watch, nextTick, createApp,unref } from 'vue';
   import { Icon } from '/@/components/Icon';
   import { getToken } from '/@/utils/auth';
-  import { uploadUrl } from '/@/api/common/api';
+  import { uploadUrl, uploadManagedUrl } from '/@/api/common/api';
   import { propTypes } from '/@/utils/propTypes';
   import { useMessage } from '/@/hooks/web/useMessage';
   import { createImgPreview } from '/@/components/Preview/index';
@@ -50,6 +50,13 @@
     fileType: propTypes.string.def(UploadTypeEnum.all),
     /*这个属性用于控制文件上传的业务路径*/
     bizPath: propTypes.string.def('temp'),
+    /**
+     * 业务标识，格式：{table_name}.{field_name}
+     * 传入即为托管模式，返回 file_id，文件信息存入 sys_attachment 表
+     * 不传则为旧模式，返回文件路径（默认，兼容旧方式）
+     * 使用 buildBizCode('table_name', 'field_name') 构建
+     */
+    bizCode: propTypes.string.def(''),
     /**
      * 是否返回url，
      * true：仅返回url
@@ -103,7 +110,12 @@
     bind.name = 'file';
     bind.listType = isImageMode.value ? 'picture-card' : 'text';
     bind.class = [bind.class, { 'upload-disabled': props.disabled }];
-    bind.data = { biz: props.bizPath, ...bind.data };
+    // 托管模式：action 切换为 /sys/file/upload；旧模式：保持 /sys/common/upload
+    bind.action = props.bizCode ? uploadManagedUrl : uploadUrl;
+    bind.data = {
+      ...(props.bizCode ? { bizCode: props.bizCode } : { biz: props.bizPath }),
+      ...bind.data,
+    };
     // 代码逻辑说明: 自定义beforeUpload return false，并不能中断上传过程
     if (!bind.beforeUpload) {
       bind.beforeUpload = onBeforeUpload;
@@ -202,7 +214,13 @@
     // 代码逻辑说明: 【issues/7990】图片参数中包含逗号会错误的识别成多张图
     const result = split(paths);
     for (const item of result) {
-      let url = getFileAccessHttpUrl(item);
+      let url;
+      if (props.bizCode) {
+        // 托管模式：item 是 file_id，使用 view 接口预览
+        url = `/sys/file/view/${item}`;
+      } else {
+        url = getFileAccessHttpUrl(item);
+      }
       list.push({
         uid: uidGenerator(),
         name: getFileName(item),
@@ -222,13 +240,19 @@
     }
     let list: any[] = [];
     for (const item of array) {
-      let url = getFileAccessHttpUrl(item.filePath);
+      let url;
+      if (props.bizCode) {
+        // 托管模式：item.fileId 是 file_id，使用 view 接口预览
+        url = `/sys/file/view/${item.fileId}`;
+      } else {
+        url = getFileAccessHttpUrl(item.filePath);
+      }
       list.push({
         uid: uidGenerator(),
         name: item.fileName,
         url: url,
         status: 'done',
-        response: { status: 'history', message: item.filePath },
+        response: { status: 'history', message: props.bizCode ? item.fileId : item.filePath },
       });
     }
     fileList.value = list;
@@ -291,7 +315,13 @@
         successFileList = fileListTemp.map((file) => {
           if (file.response) {
             let reUrl = file.response.message;
-            file.url = getFileAccessHttpUrl(reUrl);
+            if (props.bizCode) {
+              // 托管模式：response.message 是 file_id
+              file.fileId = reUrl;
+              file.url = `/sys/file/view/${reUrl}`;
+            } else {
+              file.url = getFileAccessHttpUrl(reUrl);
+            }
           }
           return file;
         });
@@ -316,11 +346,14 @@
         let newFileList: any[] = [];
         for (const item of fileListTemp) {
           if (item.status === 'done') {
-            let fileJson = {
+            let fileJson: Record<string, any> = {
               fileName: item.name,
               filePath: item.response.message,
               fileSize: item.size,
             };
+            if (props.bizCode) {
+              fileJson.fileId = item.fileId || item.response.message;
+            }
             newFileList.push(fileJson);
           }else{
             return;
@@ -341,7 +374,12 @@
     let pathList: string[] = [];
     for (const item of uploadFiles) {
       if (item.status === 'done') {
-        pathList.push(item.response.message);
+        if (props.bizCode) {
+          // 托管模式：返回 file_id
+          pathList.push(item.fileId || item.response.message);
+        } else {
+          pathList.push(item.response.message);
+        }
       } else {
         return;
       }

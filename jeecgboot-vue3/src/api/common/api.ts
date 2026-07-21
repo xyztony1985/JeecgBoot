@@ -30,6 +30,11 @@ enum Api {
 export const uploadUrl = `${baseUploadUrl}/sys/common/upload`;
 
 /**
+ * 托管模式上传路径
+ */
+export const uploadManagedUrl = `${baseUploadUrl}/sys/file/upload`;
+
+/**
  * 职务列表
  * @param params
  */
@@ -188,3 +193,24 @@ export const refreshDragCache = () => defHttp.get({ url: Api.refreshDragCache },
  * @param params
  */
 export const refreshHomeCache = () => defHttp.get({ url: Api.refreshDefaultIndexCache }, { isTransformResponse: false });
+
+/**
+ * 根据 file_id 获取文件信息
+ */
+export const getFileInfo = (id: string) => {
+  return defHttp.get({ url: '/sys/file/info', params: { id } });
+};
+
+/**
+ * 根据 file_id 获取文件 URL
+ */
+export const getFileUrl = (id: string) => {
+  return defHttp.get({ url: '/sys/file/url', params: { id } });
+};
+
+/**
+ * 软删除附件
+ */
+export const deleteFile = (id: string) => {
+  return defHttp.post({ url: '/sys/file/delete', params: { id } });
+};
