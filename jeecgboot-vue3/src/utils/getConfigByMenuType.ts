@@ -24,9 +24,9 @@ export function getConfigByMenuType(menuType: MenuTypeEnum): {
     mode = MenuModeEnum.HORIZONTAL;
   } else if (menuType === MenuTypeEnum.MIX) {
     // 顶部混合菜单模式
-    themeColor = APP_PRESET_COLOR_LIST[2];
-    headerBgColor = HEADER_PRESET_BG_COLOR_LIST[2];
-    sideBgColor = SIDE_BAR_BG_COLOR_LIST[3];
+    themeColor = APP_PRESET_COLOR_LIST[8];
+    headerBgColor = HEADER_PRESET_BG_COLOR_LIST[8];
+    sideBgColor = SIDE_BAR_BG_COLOR_LIST[6];
     split = true;
   } else if (menuType === MenuTypeEnum.MIX_SIDEBAR) {
     // 侧边折叠导航模式
