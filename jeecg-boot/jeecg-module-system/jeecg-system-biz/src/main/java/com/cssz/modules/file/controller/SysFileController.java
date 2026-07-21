@@ -70,8 +70,8 @@ public class SysFileController {
     @Value(value = "${jeecg.path.upload}")
     private String uploadpath;
 
-    /** bizCode 中 tableName 和 fieldName 的校验正则：只允许字母、数字、下划线 */
-    private static final Pattern BIZ_CODE_PART_PATTERN = Pattern.compile("^[a-zA-Z0-9_]+$");
+    /** bizCode 中 tableName 和 fieldName 的校验正则：只允许字母、数字、下划线、连字符 */
+    private static final Pattern BIZ_CODE_PART_PATTERN = Pattern.compile("^[a-zA-Z0-9_-]+$");
 
     /**
      * 托管模式上传

@@ -56,10 +56,9 @@
   import { PageWrapper } from '/@/components/Page';
   import { FormSchema, useForm, BasicForm } from '/@/components/Form';
   import { UploadTypeEnum } from '/@/components/Form/src/jeecg/components/JUpload';
-  import { buildBizCode } from '/@/utils/common/fileHelper';
 
   // bizCode 示例：假设业务表为 demo_attachment，字段为 file
-  const demoBizCode = buildBizCode('demo_attachment', 'file');
+  const demoBizCode = 'demo_attachment.file';
 
   // ========== 旧模式 ==========
   const oldFormValues = ref('');
@@ -122,7 +121,7 @@
       component: 'JUpload',
       label: '上传图片',
       componentProps: {
-        bizCode: buildBizCode('demo_attachment', 'image'),
+        bizCode: 'demo_attachment.image',
         fileType: UploadTypeEnum.image,
         onChange: (val) => {
           managedFormValues.value = val;

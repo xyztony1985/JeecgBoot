@@ -258,15 +258,15 @@ public class SysFileController {
 }
 ```
 
-**文件访问接口 `/sys/file/view/{id}`**：托管模式下的文件访问统一通过此入口，校验软删除状态后重定向到实际文件地址。CommonController 的 `view()` 保持不变，旧模式仍走 `/sys/common/static/**`，零侵入。
+**文件访问接口 `/sys/file/view/{id}`**：托管模式下的文件访问统一通过此入口，校验软删除状态后直接返回文件流或重定向到云存储地址。CommonController 的 `view()` 保持不变，旧模式仍走 `/sys/common/static/**`，零侵入。
 
 ```java
 /**
  * 文件访问入口（托管模式）
  * GET /sys/file/view/{id}
  * 
- * 校验软删除状态后，重定向到实际文件地址：
- * - local 存储：重定向到 /sys/common/static/{filePath}
+ * 校验软删除状态后：
+ * - local 存储：直接读取文件流返回（减少一次重定向）
  * - minio/oss 存储：重定向到完整 URL
  */
 @GetMapping(value = "/view/{id}")
@@ -276,17 +276,38 @@ public void view(@PathVariable String id, HttpServletResponse response) throws I
         response.setStatus(HttpServletResponse.SC_NOT_FOUND);
         return;
     }
-    
-    String redirectUrl;
+
     if (CommonConstant.UPLOAD_TYPE_LOCAL.equals(attachment.getStorageType())) {
-        // local 存储：重定向到 CommonController 的静态文件访问接口
-        redirectUrl = "/sys/common/static/" + attachment.getFilePath();
+        // local 存储：直接读取文件流返回
+        String filePath = attachment.getFilePath();
+        // 安全检查：过滤路径遍历
+        filePath = filePath.replace("..", "").replace("../", "");
+        SsrfFileTypeFilter.checkDownloadFileType(filePath);
+
+        String fullPath = uploadpath + File.separator + filePath;
+        File file = new File(fullPath);
+        if (!file.exists()) {
+            response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+            log.warn("文件[{}]不存在..", filePath);
+            return;
+        }
+        // 设置响应头，使用原始文件名
+        response.setContentType("application/force-download");
+        response.addHeader("Content-Disposition", "attachment;fileName=" + new String(attachment.getFileName().getBytes("UTF-8"), "iso-8859-1"));
+        // 流式返回文件
+        try (InputStream inputStream = new BufferedInputStream(new FileInputStream(file));
+             OutputStream outputStream = response.getOutputStream()) {
+            byte[] buf = new byte[8192];
+            int len;
+            while ((len = inputStream.read(buf)) != -1) {
+                outputStream.write(buf, 0, len);
+            }
+            outputStream.flush();
+        }
     } else {
-        // minio/oss 存储：直接重定向到完整 URL
-        redirectUrl = attachment.getFilePath();
+        // minio/oss 存储：重定向到完整 URL
+        response.sendRedirect(attachment.getFilePath());
     }
-    
-    response.sendRedirect(redirectUrl);
 }
 ```
 
@@ -297,7 +318,7 @@ public void view(@PathVariable String id, HttpServletResponse response) throws I
 | `POST /sys/file/upload` | upload | 托管模式上传，返回 file_id |
 | `GET /sys/file/info` | info | 根据 file_id 获取文件信息 |
 | `GET /sys/file/url` | url | 根据 file_id 获取文件访问 URL |
-| `GET /sys/file/view/{id}` | view | 文件访问入口，校验后重定向 |
+| `GET /sys/file/view/{id}` | view | 文件访问入口，local 直接返回文件流，minio/oss 重定向 |
 | `POST /sys/file/delete` | delete | 软删除附件 |
 
 **前端使用方式：**
@@ -521,7 +542,8 @@ function handleUploadSuccess(file) {
 function getFilePreviewUrl(filePath: string) {
   if (props.bizCode) {
     // file_id → 直接使用 /sys/file/view 接口，无需异步获取 URL
-    return Promise.resolve(`/sys/file/view/${filePath}`);
+    // 注意：需要加上 apiUrl 前缀，确保请求能正确代理到后端
+    return Promise.resolve(`${apiUrl}/sys/file/view/${filePath}`);
   }
   // 路径 → 直接转换
   return Promise.resolve(getFileAccessHttpUrl(filePath));

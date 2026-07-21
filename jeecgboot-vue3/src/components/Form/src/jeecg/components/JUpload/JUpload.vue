@@ -56,7 +56,7 @@
      * 业务标识，格式：{table_name}.{field_name}
      * 传入即为托管模式，返回 file_id，文件信息存入 sys_attachment 表
      * 不传则为旧模式，返回文件路径（默认，兼容旧方式）
-     * 使用 buildBizCode('table_name', 'field_name') 构建
+     * 示例：'my_report.attachment'
      */
     bizCode: propTypes.string.def(''),
     /**
@@ -104,6 +104,26 @@
     }
     return false
   });
+  // bizCode 格式校验：{table_name}.{field_name}，只允许字母、数字、下划线、连字符
+  const BIZ_CODE_PATTERN = /^[a-zA-Z0-9_-]+\.[a-zA-Z0-9_-]+$/;
+
+  // 校验 bizCode 格式
+  const isValidBizCode = computed(() => {
+    if (!props.bizCode) return false;
+    return BIZ_CODE_PATTERN.test(props.bizCode);
+  });
+
+  // 监听 bizCode 格式错误，给出警告
+  watch(
+    () => props.bizCode,
+    (val) => {
+      if (val && !BIZ_CODE_PATTERN.test(val)) {
+        createMessage.warning(`bizCode 格式错误: "${val}"，正确格式为: 表名.字段名（只允许字母、数字、下划线、连字符）`);
+      }
+    },
+    { immediate: true }
+  );
+
   // 合并 props 和 attrs
   const bindProps = computed(() => {
     // 代码逻辑说明: [issue/455]上传组件传入accept限制上传文件类型无效
@@ -112,10 +132,17 @@
     bind.name = 'file';
     bind.listType = isImageMode.value ? 'picture-card' : 'text';
     bind.class = [bind.class, { 'upload-disabled': props.disabled }];
+    
+    // bizCode 有值但格式错误时，禁用上传
+    const bizCodeInvalid = props.bizCode && !isValidBizCode.value;
+    if (bizCodeInvalid) {
+      bind.disabled = true;
+    }
+    
     // 托管模式：action 切换为 /sys/file/upload；旧模式：保持 /sys/common/upload
-    bind.action = props.bizCode ? uploadManagedUrl : uploadUrl;
+    bind.action = isValidBizCode.value ? uploadManagedUrl : uploadUrl;
     bind.data = {
-      ...(props.bizCode ? { bizCode: props.bizCode } : { biz: props.bizPath }),
+      ...(isValidBizCode.value ? { bizCode: props.bizCode } : { biz: props.bizPath }),
       ...bind.data,
     };
     // 代码逻辑说明: 自定义beforeUpload return false，并不能中断上传过程
