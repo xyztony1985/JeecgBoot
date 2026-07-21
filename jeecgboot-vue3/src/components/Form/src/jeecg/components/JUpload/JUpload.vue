@@ -39,9 +39,11 @@
   import { getFileAccessHttpUrl, getHeaders } from '/@/utils/common/compUtils';
   import UploadItemActions from './components/UploadItemActions.vue';
   import { split } from '/@/utils/index';
+  import { useGlobSetting } from '/@/hooks/setting';
 
   const { createMessage, createConfirm } = useMessage();
   const { prefixCls } = useDesign('j-upload');
+  const { apiUrl } = useGlobSetting();
   const attrs = useAttrs();
   const emit = defineEmits(['change', 'update:value']);
   const props = defineProps({
@@ -217,7 +219,7 @@
       let url;
       if (props.bizCode) {
         // 托管模式：item 是 file_id，使用 view 接口预览
-        url = `/sys/file/view/${item}`;
+        url = `${apiUrl}/sys/file/view/${item}`;
       } else {
         url = getFileAccessHttpUrl(item);
       }
@@ -243,7 +245,7 @@
       let url;
       if (props.bizCode) {
         // 托管模式：item.fileId 是 file_id，使用 view 接口预览
-        url = `/sys/file/view/${item.fileId}`;
+        url = `${apiUrl}/sys/file/view/${item.fileId}`;
       } else {
         url = getFileAccessHttpUrl(item.filePath);
       }
@@ -318,7 +320,7 @@
             if (props.bizCode) {
               // 托管模式：response.message 是 file_id
               file.fileId = reUrl;
-              file.url = `/sys/file/view/${reUrl}`;
+              file.url = `${apiUrl}/sys/file/view/${reUrl}`;
             } else {
               file.url = getFileAccessHttpUrl(reUrl);
             }

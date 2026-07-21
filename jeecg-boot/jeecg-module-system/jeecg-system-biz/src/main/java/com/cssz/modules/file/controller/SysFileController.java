@@ -1,7 +1,11 @@
 package com.cssz.modules.file.controller;
 
+import java.io.BufferedInputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -154,9 +158,9 @@ public class SysFileController {
     /**
      * 文件访问入口（托管模式）
      * GET /sys/file/view/{id}
-     * 校验软删除状态后，重定向到实际文件地址
+     * 校验软删除状态后，直接返回文件流或重定向到云存储地址
      */
-    @Operation(summary = "文件访问入口", description = "校验软删除状态后重定向到实际文件地址")
+    @Operation(summary = "文件访问入口", description = "校验软删除状态后返回文件流或重定向")
     @GetMapping(value = "/view/{id}")
     public void view(@PathVariable String id, HttpServletResponse response) throws IOException {
         SysAttachment attachment = sysAttachmentService.getById(id);
@@ -165,16 +169,37 @@ public class SysFileController {
             return;
         }
 
-        String redirectUrl;
         if (CommonConstant.UPLOAD_TYPE_LOCAL.equals(attachment.getStorageType())) {
-            // local 存储：重定向到 CommonController 的静态文件访问接口
-            redirectUrl = "/sys/common/static/" + attachment.getFilePath();
-        } else {
-            // minio/oss 存储：直接重定向到完整 URL
-            redirectUrl = attachment.getFilePath();
-        }
+            // local 存储：直接读取文件流返回
+            String filePath = attachment.getFilePath();
+            // 安全检查：过滤路径遍历
+            filePath = filePath.replace("..", "").replace("../", "");
+            SsrfFileTypeFilter.checkDownloadFileType(filePath);
 
-        response.sendRedirect(redirectUrl);
+            String fullPath = uploadpath + File.separator + filePath;
+            File file = new File(fullPath);
+            if (!file.exists()) {
+                response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+                log.warn("文件[{}]不存在..", filePath);
+                return;
+            }
+            // 设置响应头
+            response.setContentType("application/force-download");
+            response.addHeader("Content-Disposition", "attachment;fileName=" + new String(attachment.getFileName().getBytes("UTF-8"), "iso-8859-1"));
+            // 流式返回文件
+            try (InputStream inputStream = new BufferedInputStream(new FileInputStream(file));
+                 OutputStream outputStream = response.getOutputStream()) {
+                byte[] buf = new byte[8192];
+                int len;
+                while ((len = inputStream.read(buf)) != -1) {
+                    outputStream.write(buf, 0, len);
+                }
+                outputStream.flush();
+            }
+        } else {
+            // minio/oss 存储：重定向到完整 URL
+            response.sendRedirect(attachment.getFilePath());
+        }
     }
 
     /**
