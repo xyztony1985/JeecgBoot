@@ -52,7 +52,7 @@ Read: dev-guide/数据库规范.md
 │
 ├── 📗 新增文件（N 个）
 │   ├── 数据库（N 个）
-│   │   └── sql/V{date}_{seq}__{module}_{action}.sql
+│   │   └── db/V{date}_{seq}__{module}_{action}.sql
 │   ├── 后端（N 个）
 │   │   └── com/cssz/modules/{模块名}/
 │   │       ├── entity/XxxEntity.java
@@ -81,7 +81,7 @@ Read: dev-guide/数据库规范.md
 │
 ├── 📗 新增文件（7 个）
 │   ├── 数据库（1 个）
-│   │   └── sql/V20260720_0__attachment_create_sys_attachment.sql
+│   │   └── db/V20260720_0__attachment_create_sys_attachment.sql
 │   ├── 后端（5 个）
 │   │   └── com/cssz/modules/file/
 │   │       ├── entity/SysAttachment.java

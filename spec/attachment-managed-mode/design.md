@@ -738,7 +738,7 @@ const url = await resolveFileId(fileId);
 
 | 文件 | 说明 |
 |------|------|
-| `sql/V20260720_0__attachment_create_sys_attachment.sql` | 建表脚本 |
+| `db/V20260720_0__attachment_create_sys_attachment.sql` | 建表脚本 |
 
 **风险与应对：**
 - 无特殊风险
