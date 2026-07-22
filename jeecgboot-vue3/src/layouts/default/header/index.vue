@@ -228,7 +228,7 @@
 
   .ant-layout .@{prefix-cls} {
     display: flex;
-    padding: 0 8px;
+    padding: 0;
     // 代码逻辑说明: 【QQYUN-8762】顶栏高度
     height: @header-height;
     align-items: center;
