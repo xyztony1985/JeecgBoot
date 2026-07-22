@@ -10,6 +10,8 @@
 │   └── {feature-name}/   # 单个需求目录（kebab-case 命名）
 │       ├── prd.md        # 产品需求文档
 │       └── design.md     # 技术设计文档
+├── db/                   # 数据库脚本（Flyway 迁移脚本）
+├── dev-guide/            # 开发规范指南（技术设计和编码时必须读取参考）
 ├── jeecg-boot/           # 后端代码
 └── jeecgboot-vue3/       # Web 前端代码
 ```
