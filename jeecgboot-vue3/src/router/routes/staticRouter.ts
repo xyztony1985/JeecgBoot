@@ -20,4 +20,18 @@ export const AI_ROUTE: AppRouteRecordRaw = {
   ],
 };
 
+/**
+ * 开发模式：页面浏览器路由（基础路由，无需登录即可访问）
+ * 不使用 LAYOUT，作为独立页面显示
+ */
+export const DEV_PAGES_ROUTE: AppRouteRecordRaw = {
+  path: '/dev/pages',
+  name: 'dev-pages-browser',
+  component: () => import('/@/views/dev/DevPages.vue'),
+  meta: {
+    title: '页面浏览器',
+    ignoreAuth: true, // 无需登录即可访问浏览器页面
+  },
+};
+
 export const staticRoutesList = [AI_ROUTE];

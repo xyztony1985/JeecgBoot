@@ -29,6 +29,11 @@ const ROOT_PATH = RootRoute.path;
 // 代码逻辑说明: [VUEN-2472]分享免登录------------
 const whitePathList: PageEnum[] = [LOGIN_PATH, OAUTH2_LOGIN_PAGE_PATH,SYS_FILES_PATH, TOKEN_LOGIN ];
 
+// 开发模式：添加页面浏览器到白名单
+if (import.meta.env.DEV) {
+  whitePathList.push('/dev/pages' as PageEnum);
+}
+
 export function createPermissionGuard(router: Router) {
   const userStore = useUserStoreWithOut();
   const permissionStore = usePermissionStoreWithOut();

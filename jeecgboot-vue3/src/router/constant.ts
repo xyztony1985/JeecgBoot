@@ -14,6 +14,11 @@ export const EXCEPTION_COMPONENT = () => import('/@/views/sys/exception/Exceptio
 export const LAYOUT = () => import('/@/layouts/default/index.vue');
 
 /**
+ * @description: clean layout (for dev pages, no header/sidebar/footer)
+ */
+export const CLEAN_LAYOUT = () => import('/@/layouts/clean/index.vue');
+
+/**
  * @description: parent-layout
  */
 export const getParentLayout = (_name?: string) => {

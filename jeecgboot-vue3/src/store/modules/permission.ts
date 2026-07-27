@@ -16,6 +16,8 @@ import { PermissionModeEnum } from '/@/enums/appEnum';
 import { asyncRoutes } from '/@/router/routes';
 import { ERROR_LOG_ROUTE, PAGE_NOT_FOUND_ROUTE } from '/@/router/routes/basic';
 import { staticRoutesList } from '../../router/routes/staticRouter';
+import { dynamicPages } from '/@/utils/dynamicPages';
+import { CLEAN_LAYOUT } from '/@/router/constant';
 
 import { filter } from '/@/utils/helper/treeHelper';
 
@@ -23,6 +25,64 @@ import { getBackMenuAndPerms } from '/@/api/sys/menu';
 
 import { useMessage } from '/@/hooks/web/useMessage';
 import { PageEnum } from '/@/enums/pageEnum';
+
+/**
+ * 生成开发模式下的动态路由
+ * 使用单个父路由包裹所有开发页面，减少路由对象层级
+ */
+function generateDevRoutes(): AppRouteRecordRaw[] {
+  // 收集所有有效的页面路径
+  const pageRoutes: AppRouteRecordRaw[] = [];
+  const existingPaths = new Set<string>();
+
+  Object.keys(dynamicPages).forEach((key) => {
+    // 提取相对路径：../views/demo/cssz/MyPage.vue -> demo/cssz/MyPage
+    const relativePath = key
+      .replace(/^\.\.\/views\//, '')
+      .replace(/\.(vue|tsx)$/, '');
+
+    // 跳过 components 目录
+    if (relativePath.includes('/components/') || relativePath.startsWith('components/')) {
+      return;
+    }
+
+    const routePath = `/${relativePath}`;
+
+    // 避免重复
+    if (existingPaths.has(routePath)) {
+      return;
+    }
+    existingPaths.add(routePath);
+
+    // 生成路由名称：dev-page-demo-cssz-MyPage
+    const routeName = `dev-page-${relativePath.replace(/\//g, '-')}`;
+
+    pageRoutes.push({
+      path: routePath,
+      name: routeName,
+      component: dynamicPages[key] as any,
+      meta: {
+        title: relativePath.split('/').pop() || 'Dev Page',
+        hideMenu: true,
+        ignoreAuth: false, // 需要登录才能访问开发页面
+      },
+    });
+  });
+
+  // 如果没有页面，返回空数组
+  if (pageRoutes.length === 0) {
+    return [];
+  }
+
+  // 返回单个父路由，包裹所有开发页面
+  return [{
+    path: '',
+    name: 'dev-pages-parent',
+    component: CLEAN_LAYOUT,
+    meta: { title: '页面浏览器' },
+    children: pageRoutes,
+  }];
+}
 
 // 系统权限
 interface AuthItem {
@@ -275,6 +335,12 @@ export const usePermissionStore = defineStore({
           routeList = flatMultiLevelRoutes(routeList);
           // 代码逻辑说明: 【TV360X-522】ai助手路由写死在前端
           routes = [PAGE_NOT_FOUND_ROUTE, ...routeList, ...staticRoutesList];
+
+          // 开发模式：追加开发路由（使用单个父路由优化）
+          if (import.meta.env.DEV) {
+            const devRoutes = generateDevRoutes();
+            routes.push(...devRoutes);
+          }
           break;
       }
 
