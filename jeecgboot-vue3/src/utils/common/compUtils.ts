@@ -10,7 +10,6 @@ import Big from 'big.js';
 
 import { Modal } from "ant-design-vue";
 import { defHttp } from "@/utils/http/axios";
-import { getFileInfo } from "/@/api/common/api";
 import { useI18n } from "@/hooks/web/useI18n";
 import {$electron} from "@/electron";
 import {router} from "@/router";
@@ -41,33 +40,6 @@ export const getFileAccessHttpUrl = (fileUrl, prefix = 'http') => {
     }
   } catch (err) {}
   return result;
-};
-/**
- * 解析文件路径（旧模式使用）
- * @param path 文件路径（相对路径或完整 URL）
- */
-export const resolveFilePath = (path: string): string => {
-  if (!path) return '';
-  if (path.startsWith('http')) return path;
-  return getFileAccessHttpUrl(path);
-};
-
-/**
- * 解析文件 ID（托管模式使用，适用于需要真实 URL 的场景如下载）
- * 根据 storageType 返回可用的完整 URL：
- * - local 存储：通过 getFileAccessHttpUrl 转换相对路径
- * - minio/oss 存储：直接返回完整 URL
- * @param fileId 文件 ID
- */
-export const resolveFileId = async (fileId: string): Promise<string> => {
-  if (!fileId) return '';
-  const info = await getFileInfo(fileId);
-  if (!info) return '';
-  if (info.storageType === 'local') {
-    return getFileAccessHttpUrl(info.filePath);
-  }
-  // minio/oss 存储，filePath 已是完整 URL
-  return info.filePath;
 };
 
 /**

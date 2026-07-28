@@ -29,7 +29,7 @@
   import { ref, reactive, computed, watch, nextTick, createApp,unref } from 'vue';
   import { Icon } from '/@/components/Icon';
   import { getToken } from '/@/utils/auth';
-  import { uploadUrl, uploadManagedUrl } from '/@/api/common/api';
+  import { uploadUrl } from '/@/api/common/api';
   import { propTypes } from '/@/utils/propTypes';
   import { useMessage } from '/@/hooks/web/useMessage';
   import { createImgPreview } from '/@/components/Preview/index';
@@ -39,11 +39,9 @@
   import { getFileAccessHttpUrl, getHeaders } from '/@/utils/common/compUtils';
   import UploadItemActions from './components/UploadItemActions.vue';
   import { split } from '/@/utils/index';
-  import { useGlobSetting } from '/@/hooks/setting';
 
   const { createMessage, createConfirm } = useMessage();
   const { prefixCls } = useDesign('j-upload');
-  const { apiUrl } = useGlobSetting();
   const attrs = useAttrs();
   const emit = defineEmits(['change', 'update:value']);
   const props = defineProps({
@@ -52,13 +50,6 @@
     fileType: propTypes.string.def(UploadTypeEnum.all),
     /*这个属性用于控制文件上传的业务路径*/
     bizPath: propTypes.string.def('temp'),
-    /**
-     * 业务标识，格式：{table_name}.{field_name}
-     * 传入即为托管模式，返回 file_id，文件信息存入 sys_attachment 表
-     * 不传则为旧模式，返回文件路径（默认，兼容旧方式）
-     * 示例：'my_report.attachment'
-     */
-    bizCode: propTypes.string.def(''),
     /**
      * 是否返回url，
      * true：仅返回url
@@ -104,26 +95,6 @@
     }
     return false
   });
-  // bizCode 格式校验：{table_name}.{field_name}，只允许字母、数字、下划线、连字符
-  const BIZ_CODE_PATTERN = /^[a-zA-Z0-9_-]+\.[a-zA-Z0-9_-]+$/;
-
-  // 校验 bizCode 格式
-  const isValidBizCode = computed(() => {
-    if (!props.bizCode) return false;
-    return BIZ_CODE_PATTERN.test(props.bizCode);
-  });
-
-  // 监听 bizCode 格式错误，给出警告
-  watch(
-    () => props.bizCode,
-    (val) => {
-      if (val && !BIZ_CODE_PATTERN.test(val)) {
-        createMessage.warning(`bizCode 格式错误: "${val}"，正确格式为: 表名.字段名（只允许字母、数字、下划线、连字符）`);
-      }
-    },
-    { immediate: true }
-  );
-
   // 合并 props 和 attrs
   const bindProps = computed(() => {
     // 代码逻辑说明: [issue/455]上传组件传入accept限制上传文件类型无效
@@ -132,19 +103,7 @@
     bind.name = 'file';
     bind.listType = isImageMode.value ? 'picture-card' : 'text';
     bind.class = [bind.class, { 'upload-disabled': props.disabled }];
-    
-    // bizCode 有值但格式错误时，禁用上传
-    const bizCodeInvalid = props.bizCode && !isValidBizCode.value;
-    if (bizCodeInvalid) {
-      bind.disabled = true;
-    }
-    
-    // 托管模式：action 切换为 /sys/file/upload；旧模式：保持 /sys/common/upload
-    bind.action = isValidBizCode.value ? uploadManagedUrl : uploadUrl;
-    bind.data = {
-      ...(isValidBizCode.value ? { bizCode: props.bizCode } : { biz: props.bizPath }),
-      ...bind.data,
-    };
+    bind.data = { biz: props.bizPath, ...bind.data };
     // 代码逻辑说明: 自定义beforeUpload return false，并不能中断上传过程
     if (!bind.beforeUpload) {
       bind.beforeUpload = onBeforeUpload;
@@ -243,13 +202,7 @@
     // 代码逻辑说明: 【issues/7990】图片参数中包含逗号会错误的识别成多张图
     const result = split(paths);
     for (const item of result) {
-      let url;
-      if (props.bizCode) {
-        // 托管模式：item 是 file_id，使用 view 接口预览
-        url = `${apiUrl}/sys/file/view/${item}`;
-      } else {
-        url = getFileAccessHttpUrl(item);
-      }
+      let url = getFileAccessHttpUrl(item);
       list.push({
         uid: uidGenerator(),
         name: getFileName(item),
@@ -269,19 +222,13 @@
     }
     let list: any[] = [];
     for (const item of array) {
-      let url;
-      if (props.bizCode) {
-        // 托管模式：item.fileId 是 file_id，使用 view 接口预览
-        url = `${apiUrl}/sys/file/view/${item.fileId}`;
-      } else {
-        url = getFileAccessHttpUrl(item.filePath);
-      }
+      let url = getFileAccessHttpUrl(item.filePath);
       list.push({
         uid: uidGenerator(),
         name: item.fileName,
         url: url,
         status: 'done',
-        response: { status: 'history', message: props.bizCode ? item.fileId : item.filePath },
+        response: { status: 'history', message: item.filePath },
       });
     }
     fileList.value = list;
@@ -344,13 +291,7 @@
         successFileList = fileListTemp.map((file) => {
           if (file.response) {
             let reUrl = file.response.message;
-            if (props.bizCode) {
-              // 托管模式：response.message 是 file_id
-              file.fileId = reUrl;
-              file.url = `${apiUrl}/sys/file/view/${reUrl}`;
-            } else {
-              file.url = getFileAccessHttpUrl(reUrl);
-            }
+            file.url = getFileAccessHttpUrl(reUrl);
           }
           return file;
         });
@@ -375,14 +316,11 @@
         let newFileList: any[] = [];
         for (const item of fileListTemp) {
           if (item.status === 'done') {
-            let fileJson: Record<string, any> = {
+            let fileJson = {
               fileName: item.name,
               filePath: item.response.message,
               fileSize: item.size,
             };
-            if (props.bizCode) {
-              fileJson.fileId = item.fileId || item.response.message;
-            }
             newFileList.push(fileJson);
           }else{
             return;
@@ -403,12 +341,7 @@
     let pathList: string[] = [];
     for (const item of uploadFiles) {
       if (item.status === 'done') {
-        if (props.bizCode) {
-          // 托管模式：返回 file_id
-          pathList.push(item.fileId || item.response.message);
-        } else {
-          pathList.push(item.response.message);
-        }
+        pathList.push(item.response.message);
       } else {
         return;
       }
