@@ -6,9 +6,12 @@ import AIcon from '/@/components/jeecg/AIcon.vue';
 
 import { Button, JUploadButton } from './Button';
 import { Space } from 'ant-design-vue';
+import CsUpload from '/@/components/cssz/CsUpload/CsUpload.vue';
 
 // ant-design-vue 组件通过 unplugin-vue-components + AntDesignVueResolver 自动按需导入，无需手动注册
-const compList = [Icon, AIcon, JUploadButton];
+const compList = [Icon, AIcon, JUploadButton
+  , CsUpload
+];
 //注册online模块的全局组件
 import { registerOnlineComp } from '/@/views/super/online/cgform/auto/comp/index';
 import { createAsyncComponent } from '/@/utils/factory/createAsyncComponent';
