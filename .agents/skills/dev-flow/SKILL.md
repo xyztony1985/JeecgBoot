@@ -1,5 +1,5 @@
 ---
-name: dev-guide
+name: dev-flow
 description: "当用户要求根据设计文档/PRD/需求进行开发时，必须调用此 skill。触发词：根据文档开发、开始开发、实现功能、按设计文档开发。"
 ---
 
@@ -89,8 +89,10 @@ Read: dev-guide/数据库规范.md
 │   │       ├── service/ISysAttachmentService.java
 │   │       ├── service/impl/SysAttachmentServiceImpl.java
 │   │       └── controller/SysFileController.java
-│   └── 前端（1 个）
-│       └── src/utils/common/fileHelper.ts
+│   └── 前端（2 个）
+│       └── src/components/cssz/CsUpload/
+│           ├── CsUpload.vue
+│           └── index.ts
 │
 ├── 📝 修改文件（3 个）
 │   └── 前端
