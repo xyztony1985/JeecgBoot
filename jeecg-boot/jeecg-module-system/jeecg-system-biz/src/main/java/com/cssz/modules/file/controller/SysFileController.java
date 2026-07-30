@@ -77,12 +77,11 @@ public class SysFileController {
      * 托管模式上传
      * POST /sys/file/upload
      * 参数：bizCode（必填）、file（文件）
-     * 返回：file_id
+     * 返回：file_id、fileName、fileSize
      */
-    @Operation(summary = "托管模式上传", description = "传入 bizCode 和文件，返回 file_id")
+    @Operation(summary = "托管模式上传", description = "传入 bizCode 和文件，返回 file_id、originalFileName、fileSize")
     @PostMapping(value = "/upload")
     public Result<?> upload(HttpServletRequest request, HttpServletResponse response) throws Exception {
-        Result<?> result = new Result<>();
         String bizCode = request.getParameter("bizCode");
         if (oConvertUtils.isEmpty(bizCode)) {
             return Result.error("bizCode 不能为空");
@@ -118,13 +117,14 @@ public class SysFileController {
             attachment.setBizCode(bizCode);
             sysAttachmentService.save(attachment);
 
-            result.setMessage(attachment.getId());
-            result.setSuccess(true);
+            Map<String, Object> fileInfo = new java.util.HashMap<>();
+            fileInfo.put("fileId", attachment.getId());
+            fileInfo.put("fileName", file.getOriginalFilename());
+            fileInfo.put("fileSize", file.getSize());
+            return Result.ok(fileInfo);
         } else {
-            result.setMessage("上传失败！");
-            result.setSuccess(false);
+            return Result.error("上传失败！");
         }
-        return result;
     }
 
     /**
