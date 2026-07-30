@@ -15,9 +15,6 @@ import lombok.experimental.Accessors;
 /**
  * @Description: 实体基类，扩展自 JeecgEntity，增加删除人和所有者部门编码等公共字段
  */
-@Data
-@EqualsAndHashCode(callSuper = false)
-@Accessors(chain = true)
 public class CsEntity extends JeecgEntity {
     @Schema(description = "删除人")
     private String deleteBy;
