@@ -15,7 +15,7 @@
 **bizCode 命名规范：**
 - 格式：`{table_name}.{field_name}`，与数据库表名和字段名完全对应
 - 示例：`my_report.attachment`、`sys_user.avatar`、`contract.file`
-- 前端通过工具函数自动推导，无需手动赋值
+- 前端直接传入字符串，无需工具函数
 
 ## 二、数据库设计
 
@@ -137,7 +137,7 @@ public class SysFileController {
      * 托管模式上传
      * POST /sys/file/upload
      * 参数：bizCode（必填）、file（文件）
-     * 返回：file_id
+     * 返回：fileId、fileName、fileSize
      */
     @PostMapping(value = "/upload")
     public Result<?> upload(HttpServletRequest request, HttpServletResponse response) throws Exception {
@@ -171,7 +171,11 @@ public class SysFileController {
             attachment.setBizCode(bizCode);
             sysAttachmentService.save(attachment);
 
-            result.setMessage(attachment.getId());
+            Map<String, Object> fileInfo = new HashMap<>();
+            fileInfo.put("fileId", attachment.getId());
+            fileInfo.put("fileName", file.getOriginalFilename());
+            fileInfo.put("fileSize", file.getSize());
+            result.setResult(fileInfo);
             result.setSuccess(true);
         } else {
             result.setMessage("上传失败！");
@@ -315,7 +319,7 @@ public void view(@PathVariable String id, HttpServletResponse response) throws I
 
 | 路由 | 方法 | 说明 |
 |------|------|------|
-| `POST /sys/file/upload` | upload | 托管模式上传，返回 file_id |
+| `POST /sys/file/upload` | upload | 托管模式上传，返回 fileId、fileName、fileSize |
 | `GET /sys/file/info` | info | 根据 file_id 获取文件信息 |
 | `GET /sys/file/url` | url | 根据 file_id 获取文件访问 URL |
 | `GET /sys/file/view/{id}` | view | 文件访问入口，local 直接返回文件流，minio/oss 重定向 |
@@ -327,8 +331,9 @@ public void view(@PathVariable String id, HttpServletResponse response) throws I
 // 托管模式预览图片（推荐，直接使用 view 接口）
 <img :src="`/sys/file/view/${fileId}`" />
 
-// 或获取 URL 后使用（适用于下载等需要真实 URL 的场景）
-const url = await getFileUrl(fileId);
+// 或获取文件信息后使用（适用于下载等需要真实 URL 的场景）
+const info = await getFileInfo(fileId);
+const url = info.filePath; // local 存储为相对路径，minio/oss 为完整 URL
 ```
 
 ### 3.4 定时清理孤儿文件
@@ -468,85 +473,75 @@ private void deleteStorageFile(SysAttachment attachment) {
 
 ## 四、前端改造
 
-### 4.1 bizCode 自动推导工具
+### 4.1 新建 CsUpload 组件
 
-**文件路径：** `jeecgboot-vue3/src/utils/common/fileHelper.ts`（新建）
+**文件路径：** `jeecgboot-vue3/src/components/cssz/CsUpload/CsUpload.vue`（新建）
 
-```typescript
-/**
- * 构建 bizCode，格式：{table_name}.{field_name}
- * 用于托管模式下自动标识文件归属
- * 
- * @param tableName 数据库表名
- * @param fieldName 字段名
- * @returns bizCode 字符串
- */
-export const buildBizCode = (tableName: string, fieldName: string): string => {
-  return `${tableName}.${fieldName}`;
-};
-```
+仿照 JUpload 组件，开发纯净的全新附件上传统一管理组件，仅支持托管模式。
 
-### 4.2 JUpload 组件增加 bizCode 参数
-
-**文件路径：** `jeecgboot-vue3/src/components/Form/src/jeecg/components/JUpload/JUpload.vue`
+**核心特性：**
+- `bizCode` 为必填参数，格式：`{table_name}.{field_name}`
+- 固定使用 `/sys/file/upload` 上传接口
+- 返回值为逗号分隔的 `file_id`
+- 预览通过 `/sys/file/view/{id}` 接口
+- 支持图片模式和文件模式
+- 支持最大上传数量限制
+- 支持删除确认
 
 ```typescript
-// 新增 props
+// Props 定义
 const props = defineProps({
-  // ... 现有 props
-  /**
-   * 业务标识，格式：{table_name}.{field_name}
-   * 传入即为托管模式，返回 file_id，文件信息存入 sys_attachment 表
-   * 不传则为旧模式，返回文件路径（默认，兼容旧方式）
-   * 使用 buildBizCode('table_name', 'field_name') 构建
-   * 
-   * 托管模式下：
-   * - 不需要传 bizPath，后端自动生成存储路径：{bizCode}/{yyyy-MM}/{file}
-   * - 返回值为 file_id
-   */
-  bizCode: propTypes.string.def(''),
+  value: propTypes.string.def(''),           // 绑定值，逗号分隔的 file_id
+  text: propTypes.string.def('上传'),         // 按钮文字
+  fileType: propTypes.string.def('all'),     // 上传类型：all/image/file
+  bizCode: propTypes.string.require,         // 业务标识（必填）
+  maxCount: propTypes.number.def(0),         // 最大上传数
+  buttonVisible: propTypes.bool.def(true),   // 显示按钮
+  multiple: propTypes.bool.def(true),        // 允许多文件
+  mover: propTypes.bool.def(true),           // 显示移动按钮
+  download: propTypes.bool.def(true),        // 显示下载按钮
+  removeConfirm: propTypes.bool.def(false),  // 删除确认
+  beforeUpload: propTypes.func,              // 上传前校验
+  disabled: propTypes.bool.def(false),       // 禁用
+  replaceLastOne: propTypes.bool.def(false), // 替换最后一个
 });
 
-// 修改上传参数
+// 上传参数
 const bindProps = computed(() => {
-  const bind = Object.assign({}, props, unref(attrs));
+  const bind: any = Object.assign({}, props, unref(attrs));
   bind.name = 'file';
   bind.listType = isImageMode.value ? 'picture-card' : 'text';
-  // 托管模式：action 切换为 /sys/file/upload；旧模式：保持 /sys/common/upload
-  bind.action = props.bizCode ? '/sys/file/upload' : bind.action;
+  // 固定使用托管模式上传接口
+  bind.action = uploadManagedUrl;
   bind.data = {
-    ...(props.bizCode ? { bizCode: props.bizCode } : { biz: props.bizPath }),
-    ...bind.data
+    bizCode: props.bizCode,
+    ...bind.data,
   };
   // ...
 });
 
-// 上传成功回调修改
-// returnUrl=false 时，JSON 数组增加 file_id 字段
-function handleUploadSuccess(file) {
-  const response = file.response;
-  if (props.bizCode) {
-    // 托管模式：response.message 是 file_id
-    file.fileId = response.message;
+// 上传成功处理
+function onFileChange(info) {
+  if (info.file.status === 'done') {
+    if (info.file.response.success) {
+      // 从 response.result 获取文件信息
+      const result = info.file.response.result;
+      file.fileId = result.fileId;
+      file.url = `${apiUrl}/sys/file/view/${result.fileId}`;
+      file.name = file.name || result.fileName;
+    }
   }
-  // ... 其他逻辑
 }
 
-// 返回值处理
-// returnUrl=true: 返回逗号分隔的 file_id（托管模式）或路径（旧模式）
-// returnUrl=false: 返回 JSON 数组
-//   旧模式: [{fileName, filePath, fileSize}]
-//   托管模式: [{fileName, filePath, fileSize, fileId}]  // 新增 fileId 字段
-
-// 预览时需要区分：托管模式下 response.message 是 file_id
-function getFilePreviewUrl(filePath: string) {
-  if (props.bizCode) {
-    // file_id → 直接使用 /sys/file/view 接口，无需异步获取 URL
-    // 注意：需要加上 apiUrl 前缀，确保请求能正确代理到后端
-    return Promise.resolve(`${apiUrl}/sys/file/view/${filePath}`);
+// 返回值：逗号分隔的 file_id
+function handleFileIdChange() {
+  let fileIdList: string[] = [];
+  for (const item of fileList.value) {
+    if (item.status === 'done') {
+      fileIdList.push(item.fileId);
+    }
   }
-  // 路径 → 直接转换
-  return Promise.resolve(getFileAccessHttpUrl(filePath));
+  emitValue(fileIdList.join(','));
 }
 ```
 
@@ -570,44 +565,6 @@ function getFilePreviewUrl(filePath: string) {
 export const getFileAccessHttpUrl = (fileUrl, prefix = 'http') => {
   // 原有逻辑不变
 };
-
-/**
- * 解析文件路径（旧模式使用）
- * @param path 文件路径（相对路径或完整 URL）
- */
-export const resolveFilePath = (path: string): string => {
-  if (!path) return '';
-  if (path.startsWith('http')) return path;
-  return getFileAccessHttpUrl(path);
-};
-
-/**
- * 解析文件 ID（托管模式使用，适用于需要真实 URL 的场景如下载）
- * 根据 storageType 返回可用的完整 URL：
- * - local 存储：通过 getFileAccessHttpUrl 转换相对路径
- * - minio/oss 存储：直接返回完整 URL
- * @param fileId 文件 ID
- */
-export const resolveFileId = async (fileId: string): Promise<string> => {
-  if (!fileId) return '';
-  const info = await getFileInfo(fileId);
-  if (!info) return '';
-  if (info.storageType === 'local') {
-    return getFileAccessHttpUrl(info.filePath);
-  }
-  // minio/oss 存储，filePath 已是完整 URL
-  return info.filePath;
-};
-```
-
-**使用示例：**
-
-```typescript
-// 旧模式：调用方明确知道是路径
-const url = resolveFilePath(formModel.filePath);
-
-// 托管模式：调用方明确知道是 file_id
-const url = await resolveFileId(formModel.fileId);
 ```
 
 ### 4.5 前端 API 新增
@@ -620,20 +577,6 @@ const url = await resolveFileId(formModel.fileId);
  */
 export const getFileInfo = (id: string) => {
   return defHttp.get({ url: '/sys/file/info', params: { id } });
-};
-
-/**
- * 根据 file_id 获取文件 URL
- */
-export const getFileUrl = (id: string) => {
-  return defHttp.get({ url: '/sys/file/url', params: { id } });
-};
-
-/**
- * 软删除附件
- */
-export const deleteFile = (id: string) => {
-  return defHttp.post({ url: '/sys/file/delete', params: { id } });
 };
 ```
 
@@ -653,20 +596,20 @@ const formModel = reactive({
 </script>
 ```
 
-### 5.2 新方式（托管模式）
+### 5.2 新方式（托管模式，使用 CsUpload）
 
 ```vue
 <template>
-  <!-- 托管模式：只需传 bizCode，不需要 bizPath -->
+  <!-- 托管模式：使用 CsUpload 组件，只需传 bizCode，不需要 bizPath -->
   <!-- 后端自动生成存储路径：my_report.attachment/2026-07/xxx.pdf -->
-  <JUpload v-model:value="formModel.attachment" :bizCode="bizCode" />
+  <CsUpload v-model:value="formModel.attachment" :bizCode="bizCode" />
 </template>
 
 <script setup>
-import { buildBizCode } from '/@/utils/common/fileHelper';
+import { CsUpload } from '/@/components/cssz/CsUpload';
 
-// 自动推导 bizCode：表名.字段名
-const bizCode = buildBizCode('my_report', 'attachment');
+// bizCode 格式：表名.字段名
+const bizCode = 'my_report.attachment';
 
 const formModel = reactive({
   attachment: '' // 存储: "1812345678901234567,1812345678901234568" (file_id)
@@ -691,41 +634,15 @@ async function handleSubmit() {
 </template>
 ```
 
-**旧模式**：使用 `resolveFilePath` 同步转换路径。
-
-```vue
-<template>
-  <img :src="fileUrl" />
-</template>
-
-<script setup>
-import { resolveFilePath } from '/@/utils/common/compUtils';
-
-const props = defineProps({
-  filePath: String // 文件路径
-});
-
-const fileUrl = resolveFilePath(props.filePath);
-</script>
-```
-
-**需要真实 URL 的场景**（如下载）：使用 `resolveFileId`。
-
-```typescript
-import { resolveFileId } from '/@/utils/common/compUtils';
-const url = await resolveFileId(fileId);
-// 用于 window.open(url) 下载等场景
-```
-
 ## 六、兼容性说明
 
 | 场景 | 影响 |
 |------|------|
-| 现有业务代码 | 零影响，不传 `bizCode` 即为旧模式 |
-| JUpload / JImageUpload 组件 | 零影响，新增 `bizCode` prop 有默认空值 |
+| 现有业务代码 | 零影响，旧模式使用 JUpload，托管模式使用 CsUpload |
+| JUpload / JImageUpload 组件 | 零影响，不修改现有组件 |
+| CsUpload 组件 | 纯新增，仅支持托管模式，`bizCode` 为必填参数 |
 | 后端上传接口 | 零影响，`bizCode` 参数可选 |
 | `getFileAccessHttpUrl()` | 零影响，保持同步不变 |
-| 新增 `resolveFilePath()` / `resolveFileId()` | 纯新增，调用方自行选择 |
 
 ## 七、文件清单与实施计划
 
@@ -755,10 +672,8 @@ const url = await resolveFileId(fileId);
 3. 新增定时清理孤儿附件任务（通过 bizCode 反查业务表判断引用）
 
 前端：
-1. 新增 `fileHelper.ts` 工具函数
-2. JUpload 组件增加 `bizCode` prop，托管模式下 action 切换为 `/sys/file/upload`
-3. API 层新增 getFileInfo/getFileUrl/deleteFile 方法
-4. compUtils 新增 resolveFilePath / resolveFileId 方法
+1. 新建 CsUpload 组件（仅支持托管模式），放置于 `jeecgboot-vue3/src/components/cssz/CsUpload/`
+2. API 层新增 getFileInfo 方法
 
 **新增文件：**
 
@@ -769,15 +684,14 @@ const url = await resolveFileId(fileId);
 | `jeecg-module-system/.../com/cssz/modules/file/service/ISysAttachmentService.java` | Service 接口 |
 | `jeecg-module-system/.../com/cssz/modules/file/service/impl/SysAttachmentServiceImpl.java` | Service 实现 |
 | `jeecg-module-system/.../com/cssz/modules/file/controller/SysFileController.java` | 附件管理 Controller（路由前缀 `/sys/file`） |
-| `jeecgboot-vue3/src/utils/common/fileHelper.ts` | bizCode 构建工具函数 |
+| `jeecgboot-vue3/src/components/cssz/CsUpload/CsUpload.vue` | 托管模式上传组件 |
+| `jeecgboot-vue3/src/components/cssz/CsUpload/index.ts` | 导出入口 |
 
 **修改文件：**
 
 | 文件 | 改动点 |
 |------|--------|
-| `JUpload.vue` | 增加 bizCode prop；托管模式下 action 切换为 `/sys/file/upload`；returnUrl=false 时 JSON 数组增加 fileId 字段 |
-| `api/common/api.ts` | 新增 getFileInfo/getFileUrl/deleteFile 方法（路由 `/sys/file/xxx`） |
-| `compUtils.ts` | 新增 resolveFilePath() / resolveFileId() 方法 |
+| `api/common/api.ts` | 新增 getFileInfo 方法（路由 `/sys/file/info`） |
 
 **风险与应对：**
 
