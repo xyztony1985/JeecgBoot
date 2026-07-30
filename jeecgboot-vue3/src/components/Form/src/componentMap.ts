@@ -10,6 +10,9 @@ import { createAsyncComponent } from '/@/utils/factory/createAsyncComponent';
 
 const componentMap = new Map<ComponentType, Component>();
 
+// cs 自定义组件
+componentMap.set('CsUpload', createAsyncComponent(() => import('/@/components/cssz/CsUpload/CsUpload.vue')));
+
 componentMap.set('Time', createAsyncComponent(() => import('/@/components/Time/src/Time.vue')));
 componentMap.set('Input', createAsyncComponent(() => import('ant-design-vue/es/input')));
 componentMap.set('InputGroup', createAsyncComponent(() => import('ant-design-vue/es/input/Group')));
