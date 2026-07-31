@@ -1,6 +1,6 @@
 # 附件上传使用规范
 
-> **重要提示**：新开发功能**必须使用托管模式**，旧模式已逐步淘汰。
+> **重要提示**：新开发功能**必须使用 CsUpload 组件（托管模式）**，JUpload 已不再使用。
 
 ---
 
@@ -10,7 +10,7 @@
 
 ```vue
 <template>
-  <JUpload v-model:value="formModel.file_id" bizCode="my_report.file_id" />
+  <CsUpload v-model:value="formModel.file_id" bizCode="my_report.file_id" />
 </template>
 
 <script setup>
@@ -44,13 +44,21 @@ ALTER TABLE my_report ADD COLUMN file_ids varchar(2000) COMMENT '附件file_id�
 
 ### 2.1 关键 Props
 
-| Prop | 说明 |
-|------|------|
-| `bizCode` | **必填**，业务标识，格式：`{表名}.{字段名}` |
-| `value` | 绑定值，逗号分隔的 file_id |
-| `returnUrl` | `true` 返回 file_id 字符串；`false` 返回包含 `fileId` 的 JSON 数组 |
-| `fileType` | 文件类型：`'all'`（默认）或 `'image'`（仅图片） |
-| `maxCount` | 最大上传数量，0 为不限 |
+| Prop | 类型 | 默认值 | 说明 |
+|------|------|--------|------|
+| `bizCode` | `string` | - | **必填**，业务标识，格式：`{表名}.{字段名}` |
+| `value` | `string` | `''` | 绑定值，逗号分隔的 file_id |
+| `fileType` | `string` | `'all'` | 上传类型：`'all'`（全部）/ `'image'`（仅图片）/ `'file'` |
+| `maxCount` | `number` | `0` | 最大上传数量，`0` 为不限 |
+| `text` | `string` | `'上传'` | 上传按钮文字 |
+| `multiple` | `boolean` | `true` | 是否允许多文件上传 |
+| `disabled` | `boolean` | `false` | 是否禁用 |
+| `removeConfirm` | `boolean` | `false` | 删除时是否弹出确认框 |
+| `mover` | `boolean` | `true` | 是否显示左右移动按钮（仅图片模式） |
+| `download` | `boolean` | `true` | 是否显示下载按钮（仅图片模式） |
+| `buttonVisible` | `boolean` | `true` | 是否显示上传按钮（文件模式） |
+| `beforeUpload` | `function` | - | 上传前自定义校验函数，返回 `false` 中断上传 |
+| `replaceLastOne` | `boolean` | `false` | 超出最大数量时是否替换最后一个文件 |
 
 ### 2.2 bizCode 格式说明
 
@@ -70,15 +78,15 @@ bizCode="my report.file_id"  // 包含空格
 
 ### 2.3 图片上传场景
 
-使用 JUpload 的 `fileType="image"` 限制只能上传图片：
+使用 `fileType="image"` 限制只能上传图片：
 
 ```vue
 <template>
   <!-- 单张图片上传 -->
-  <JUpload v-model:value="formModel.file_id" bizCode="sys_user.file_id" fileType="image" :maxCount="1" />
+  <CsUpload v-model:value="formModel.file_id" bizCode="sys_user.file_id" fileType="image" :maxCount="1" />
   
   <!-- 多张图片上传 -->
-  <JUpload v-model:value="formModel.file_ids" bizCode="product.file_ids" fileType="image" :maxCount="9" />
+  <CsUpload v-model:value="formModel.file_ids" bizCode="product.file_ids" fileType="image" :maxCount="9" />
 </template>
 
 <script setup>
@@ -89,7 +97,26 @@ const formModel = reactive({
 </script>
 ```
 
-### 2.4 文件预览
+### 2.4 FormSchema 中使用
+
+```typescript
+const formSchemas: FormSchema[] = [
+  {
+    field: 'files',
+    label: '普通文件',
+    component: 'CsUpload',
+    componentProps: { bizCode: 'demo_test.attachment' },
+  },
+  {
+    field: 'images',
+    label: '图片文件',
+    component: 'CsUpload',
+    componentProps: { bizCode: 'demo_test.attachment', fileType: 'image', maxCount: 3 },
+  },
+];
+```
+
+### 2.5 文件预览
 
 ```vue
 <!-- 预览 URL 格式 -->
@@ -132,7 +159,7 @@ const formModel = reactive({
 
 ## 四、后端说明
 
-> 大多数业务开发**不需要关注后端**。前端使用 JUpload 组件传入 `bizCode`，已自动关联后端 `/sys/file/upload` 接口，完成上传、入库、预览全流程。
+> 大多数业务开发**不需要关注后端**。前端使用 CsUpload 组件传入 `bizCode`，已自动关联后端 `/sys/file/upload` 接口，完成上传、入库、预览全流程。
 
 以下为后端接口参考，仅在需要程序化调用时查阅：
 
@@ -162,11 +189,15 @@ const formModel = reactive({
 ```json
 {
   "success": true,
-  "message": "1812345678901234567"
+  "result": {
+    "fileId": "1812345678901234567",
+    "fileName": "报告.pdf",
+    "fileSize": 102400
+  }
 }
 ```
 
-`message` 字段即为 `file_id`。
+`result.fileId` 字段即为 `file_id`。
 
 ### 4.3 开发要求
 
@@ -178,14 +209,15 @@ const formModel = reactive({
 
 ## 五、淘汰清单
 
-> **警告**：以下内容已逐步淘汰，**新开发功能禁止使用**，仅用于维护现有代码时参考。
+> **警告**：以下内容**已淘汰，新开发功能禁止使用**，仅用于维护现有代码时参考。
 
 ### 5.1 淘汰组件
 
-| 组件 | 替代方案 |
-|------|---------|
-| JImageUpload | 改用 JUpload + `fileType="image"` |
-| BasicUpload | 改用 JUpload |
+| 组件 | 状态 | 替代方案 |
+|------|------|---------|
+| JUpload | **已淘汰** | 改用 CsUpload |
+| JImageUpload | **已淘汰** | 改用 CsUpload + `fileType="image"` |
+| BasicUpload | **已淘汰** | 改用 CsUpload |
 
 ### 5.2 旧上传模式
 
@@ -197,9 +229,9 @@ const formModel = reactive({
 | 上传接口 | `/sys/common/upload` |
 | 文件管理 | 业务方自行处理，无孤儿清理 |
 
-**前端使用**：
+**旧模式示例（禁止在新代码中使用）**：
 
 ```vue
-<!-- ❌ 禁止：未传入 bizCode（使用旧模式） -->
+<!-- ❌ 禁止：使用 JUpload（已淘汰） -->
 <JUpload v-model:value="formData.files" bizPath="myModule/doc" />
 ```
