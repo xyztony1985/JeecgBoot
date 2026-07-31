@@ -86,25 +86,37 @@ export const formSchema: FormSchema[] = [
 
 export const dictItemColumns: BasicColumn[] = [
   {
+    title: '排序',
+    dataIndex: 'sortOrder',
+    width: 60,
+  },
+  {
     title: '名称',
     dataIndex: 'itemText',
-    width: 80,
+    width: 100,
   },
   {
     title: '数据值',
     dataIndex: 'itemValue',
-    width: 80,
+    width: 100,
   },
   {
-    title: '字典颜色',
+    title: '颜色',
     dataIndex: 'itemColor',
-    width: 80,
-    align:'center',
+    width: 60,
+  },
+  {
+    title: '状态',
+    dataIndex: 'status',
+    width: 60,
     customRender:({ text }) => {
-      return h('div', {
-        style: {"background": text, "width":"18px","height":"18px","border-radius":"50%","margin":"0 auto"}
-      })
+      return text === 1 ? '启用' : '禁用';
     }
+  },
+  {
+    title: '描述',
+    dataIndex: 'description',
+    width: 100,
   },
 ];
 

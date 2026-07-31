@@ -173,12 +173,12 @@
   function getTableAction(record) {
     return [
       {
-        label: '编辑',
-        onClick: handleEdit.bind(null, record),
-      },
-      {
         label: '字典配置',
         onClick: handleItem.bind(null, record),
+      },
+      {
+        label: '编辑',
+        onClick: handleEdit.bind(null, record),
       },
       {
         label: '删除',
